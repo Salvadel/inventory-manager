@@ -1,3 +1,17 @@
 from gui import start_gui
 from database import init_db
-#in this file we have the mainapplication controller. This determiens what screen is present and where the user currently is in the GUI
+"""
+app.py purpose:
+Initializes the application and starts the GUI.
+
+Key features:
+- Initialize database
+- Launch GUI
+
+
+def run_app() -> None:
+    input: None
+    output: None
+    use: Initializes database and starts the application interface
+    pass
+"""
