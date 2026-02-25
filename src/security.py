@@ -23,6 +23,8 @@ def validate_password(password: str) -> bool:
 """
 import re
 
+# Constraints
+
 USER_MAX_LENGTH = 20
 USER_MIN_LENGTH = 4
 PASSWORD_MIN_LENGTH = 8
