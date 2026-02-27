@@ -62,3 +62,115 @@ def add_to_buy(item_id: int) -> None:
     use: Adds item to To-Buy list in database
     pass
 """
+# Constants for Database Path and Name
+DB_NAME = Path(__file__).parent.parent / 'docs' / 'data' / 'inventory.db'
+
+''' This function should be called once at startup and ensures the system has the database intact before starting operations. '''
+def init_database():
+    # Creates a the directory for the databae if not present
+    DB_NAME.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Connect to Inventory Database and Name inventory.db
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    try: 
+        # Create Tables for Users
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                salt TEXT NOT NULL
+            )
+        ''')
+
+        # Create Tables for Inventory
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS inventory (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                quantity INTEGER NOT NULL,
+                price REAL NOT NULL
+            )
+        ''')
+
+        # Save Changes to Database and Close Connection
+        conn.commit()
+    finally:
+        conn.close()
+
+''' Retrieves the User from the Database and Returns User Records '''
+def get_user(username):
+    # Connect to Inventory Database
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    # Retrieves the User from the Database and Returns User Records
+    cursor.execute("""
+        SELECT id, username, password, salt
+        FROM users
+        WHERE username = ?
+    """, (username,))
+
+    user = cursor.fetchone()
+
+    # Closes the Connection and Returns the User Record
+    conn.close()
+    return user
+
+''' Inserts New Inventory Item into Database '''
+def add_item(item_data):
+    # Connect to Inventory Database
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    # Inserts New Inventory Items into the Database, including price, quantity, and name
+    cursor.execute('''
+        INSERT INTO inventory (name, quantity, price)
+        VALUES (?, ?, ?)
+    ''', (
+        item_data['name'],
+        item_data['quantity'],
+        item_data['price']
+    ))
+
+    # Save Changes to Database and Close Connection
+    conn.commit()
+    conn.close()
+
+''' Deletes Inventory Item from Database '''
+def remove_item(item_id):
+    # Connect to Inventory Database
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    # Deletes Inventory Item from Database based on the item_id
+    cursor.execute('''
+        DELETE FROM inventory
+        WHERE id = ?
+    ''', (item_id,))
+
+    # Save Changes to Database and Close Connection
+    conn.commit()
+    conn.close()
+
+''' Returns Matching Inventory Records based on the Keyword Search '''
+def search_items(keyword):
+    # Connect to Inventory Database
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor() 
+
+    # Returns Matching Inventory Records based on the Keyword Search using a LIKE query to find items that contain the keyword in their name
+    cursor.execute('''
+            SELECT id, name, quantity, price
+            FROM inventory
+            WHERE name LIKE ?
+        ''', (f"%{keyword}%",))
+    
+    results = cursor.fetchall()
+
+    # Save Changes to Database and Close Connection
+    conn.close()
+    return results
+
