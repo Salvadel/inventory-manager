@@ -30,7 +30,8 @@ def hash_password(password: str) -> str:
 import hashlib
 import hmac
 import secrets
-#from database import get_user
+from security import validate_username, validate_password
+from database import get_user
 
 # Constraints:
 ITERATIONS = 100000
@@ -54,19 +55,28 @@ def verify_password(password, hashed_password, salt):
     # Compares the newly hashed password with the stored hash securely to prevent timing attacks
     return hmac.compare_digest(new_hashed, hashed_password) 
 
-''' Temporary Test with mock data until database integration is complete '''
-# Setup mock password hash for testing
-hashed_password, salt = hash_password("admin123")
+''' This function handles the login process by fetching the user from the database, verifying the username and password against the stored hash and salt. It returns a success status and message based on the outcome of the login attempt. '''
+def login_user(username, password):
+    # Fetch the user from the database
+    user = get_user(username)
 
-# Setup mock user data for testing
-mock_user = {
-    "username": "admin",
-    "password_hash": hashed_password,
-    "salt": salt
-}
+    # Return "User not found." If the username is not in the database
+    if user is None:
+        return False, 'User not found.'
+    
+    # Unpack the user data from the database
+    _, _, stored_hash, stored_salt = user
 
-# Test with correct password
-print(verify_password("admin123", mock_user["password_hash"], mock_user["salt"]))
+    # Convert string back to bytes for computation
+    stored_hash = bytes.fromhex(stored_hash)
+    stored_salt = bytes.fromhex(stored_salt)
 
-# Test with wrong password
-print(verify_password("wrongpassword", mock_user["password_hash"], mock_user["salt"]))
+    # Verify the password hashes against each other
+    if verify_password(password, stored_hash, stored_salt):
+        return True, 'Login successful.'
+    else:
+        return False, 'Incorrect password.'
+
+# Tests the Login Functionalities with a Sample User that was inserted into the database 'LabTA' with the password 'COMLab123!'
+success, message = login_user("LabTA", "COMLab123!")
+print(success, message)

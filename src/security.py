@@ -24,7 +24,6 @@ def validate_password(password: str) -> bool:
 import re
 
 # Constraints
-
 USER_MAX_LENGTH = 20
 USER_MIN_LENGTH = 4
 PASSWORD_MIN_LENGTH = 8
@@ -65,6 +64,4 @@ def validate_password(password):
 
     return True, "Valid password."
 
-print(validate_username("admin"))
-
-print(validate_password("Admin123!"))
+# For reference security.py should be used wehen adding a new user or passwordto ensure they meet security requirements.
