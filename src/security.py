@@ -29,7 +29,7 @@ USER_MIN_LENGTH = 4
 PASSWORD_MIN_LENGTH = 8
 PASSWORD_MAX_LENGTH = 64
 
-''' A function to validate the username, make sure it fits username requirements. '''
+# A function to validate the username, make sure it fits username requirements
 def validate_username(username):
     if not username:
         return False, "Username cannot be empty."
@@ -42,7 +42,7 @@ def validate_username(username):
 
     return True, "Valid username."
 
-''' A function to validate the password, make sure it fits password complexity requirements. '''
+# A function to validate the password, make sure it fits password complexity requirements
 def validate_password(password):
     if len(password) < PASSWORD_MIN_LENGTH:
         return False, "Password must be at least 8 characters long"
@@ -63,5 +63,24 @@ def validate_password(password):
         return False, "Password must contain at least one special character."
 
     return True, "Valid password."
+
+# A function to validate item names for database operations
+def validate_name(name):
+    if not isinstance(name, str) or not name.strip():
+        raise ValueError("Item name must be a non-empty string.")
+
+# A function to validate item price for database operations
+def validate_price(price):
+    if not isinstance(price, (int, float)):
+        raise ValueError("Price must be a number.")
+    if price <= 0:
+        raise ValueError("Price must be greater than 0.")
+
+# A function to validate item quantity for database operations
+def validate_quantity(quantity):
+    if not isinstance(quantity, int):
+        raise ValueError("Quantity must be an integer.")
+    if quantity < 0:
+        raise ValueError("Quantity cannot be negative.")
 
 # For reference security.py should be used wehen adding a new user or passwordto ensure they meet security requirements.

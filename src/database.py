@@ -1,5 +1,3 @@
-import sqlite3
-from pathlib import Path
 """
 database.py purpose:
 Handles all database interactions.
@@ -62,10 +60,13 @@ def add_to_buy(item_id: int) -> None:
     use: Adds item to To-Buy list in database
     pass
 """
+import sqlite3
+from pathlib import Path
+
 # Constants for Database Path and Name
 DB_NAME = Path(__file__).parent.parent / 'docs' / 'data' / 'inventory.db'
 
-''' This function should be called once at startup and ensures the system has the database intact before starting operations. '''
+# This function should be called once at startup and ensures the system has the database intact before starting operations
 def init_database():
     # Creates a the directory for the databae if not present
     DB_NAME.parent.mkdir(parents=True, exist_ok=True)
@@ -100,7 +101,7 @@ def init_database():
     finally:
         conn.close()
 
-''' Retrieves the User from the Database and Returns User Records '''
+# A function to retrieve the user from the database and returns user records for login
 def get_user(username):
     # Connect to Inventory Database
     conn = sqlite3.connect(DB_NAME)
@@ -119,7 +120,7 @@ def get_user(username):
     conn.close()
     return user
 
-''' Inserts New Inventory Item into Database '''
+# A function to add an inventory item, it validates the input data for name, price, and quantity using the security module before sending the item data to the database for storage nventory
 def add_item(item_data):
     # Connect to Inventory Database
     conn = sqlite3.connect(DB_NAME)
@@ -139,7 +140,7 @@ def add_item(item_data):
     conn.commit()
     conn.close()
 
-''' Deletes Inventory Item from Database '''
+# Deletes Inventory Item from Database
 def remove_item(item_id):
     # Connect to Inventory Database
     conn = sqlite3.connect(DB_NAME)
@@ -155,7 +156,7 @@ def remove_item(item_id):
     conn.commit()
     conn.close()
 
-''' Returns Matching Inventory Records based on the Keyword Search '''
+# A function to return matching inventory records based on the Keyword Search
 def search_items(keyword):
     # Connect to Inventory Database
     conn = sqlite3.connect(DB_NAME)
@@ -167,6 +168,24 @@ def search_items(keyword):
             FROM inventory
             WHERE name LIKE ?
         ''', (f"%{keyword}%",))
+    
+    results = cursor.fetchall()
+
+    # Save Changes to Database and Close Connection
+    conn.close()
+    return results
+
+# A function to retrieve all inventory items from the database, it connects to the database, executes a query to select all items, and returns the results
+def get_all_items():
+    # Connect to Inventory Database
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor() 
+
+    # Returns all inventory items from the database
+    cursor.execute('''
+            SELECT id, name, quantity, price
+            FROM inventory
+        ''')
     
     results = cursor.fetchall()
 

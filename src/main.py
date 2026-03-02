@@ -1,4 +1,4 @@
-from app import run_app
+#from app import run_app
 """
 main.py purpose:
 Entry point of the application.
