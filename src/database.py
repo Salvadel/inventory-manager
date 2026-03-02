@@ -120,7 +120,7 @@ def get_user(username):
     conn.close()
     return user
 
-# A function to add an inventory item, it validates the input data for name, price, and quantity using the security module before sending the item data to the database for storage nventory
+''' Inserts New Inventory Item into Database '''
 def add_item(item_data):
     # Connect to Inventory Database
     conn = sqlite3.connect(DB_NAME)
