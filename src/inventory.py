@@ -115,7 +115,7 @@ def search_inventory(keyword: str):
         conn.close()
 def add_To_Buy(keyword:str):
         
-        with sqlite3.connect(db_path) as conn:
+        with sqlite3.connect(inventory.db) as conn:
             cursor = conn.cursor()
 
             # Check if the item exists
