@@ -75,8 +75,12 @@ def add_vendor_to_item(item_id, vendor_name):
     return database.add_vendor(item_id, vendor_name)   
 
 # A function to add an item to the To-Buy list, it takes the item_id as input and calls the database function to add the specified item to the user's To-Buy list
-def add_item_to_to_buy_list(item_id):
+def add_item_to_buy_list(item_id):
     return database.add_to_buy(item_id)
+
+# A function to remove an item from the To-Buy list, it takes the item_id as input and calls the database function to remove the specified item from the user's To-Buy list
+def remove_item_from_to_buy_list(item_id):
+    return database.remove_from_to_buy(item_id)
 
 # A function to view the To-Buy list, it calls the database function to retrieve all items in the user's To-Buy list and returns them to the caller. If there are no items in the To-Buy list, it returns a message indicating that the list is empty
 def view_to_buy_list():
@@ -85,7 +89,3 @@ def view_to_buy_list():
     if not items:
         return None, "To-Buy list is empty."
     return items, None
-
-# A function to remove an item from the To-Buy list, it takes the item_id as input and calls the database function to remove the specified item from the user's To-Buy list
-def remove_item_from_to_buy_list(item_id):
-    return database.remove_from_to_buy(item_id)

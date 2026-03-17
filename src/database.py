@@ -148,6 +148,26 @@ def remove_item(item_id):
     conn.commit()
     conn.close()
 
+# A function to retrieve all inventory items from the database, it connects to the database, executes a query to select all items, and returns the results
+def get_all_items():
+    # Connect to Inventory Database
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor() 
+
+    # Returns all inventory items from the database
+    cursor.execute(
+            '''
+            SELECT id, name, quantity, price
+            FROM inventory
+            '''
+        )
+    
+    results = cursor.fetchall()
+
+    # Save Changes to Database and Close Connection
+    conn.close()
+    return results
+
 # A function to return matching inventory records based on the Keyword Search
 def search_items(keyword):
     # Connect to Inventory Database
@@ -208,24 +228,41 @@ def add_to_buy(item_id):
     conn.commit()
     conn.close()
 
-# A function to retrieve all inventory items from the database, it connects to the database, executes a query to select all items, and returns the results
-def get_all_items():
+# A function to remove an item from the To-Buy list in the database, it deletes the record from the to_buy table that matches the given item_id, effectively removing the item from the user's To-Buy list
+def remove_from_to_buy(item_id):
     # Connect to Inventory Database
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor() 
 
-    # Returns all inventory items from the database
+    # Removes Item from To-Buy List in Database by deleting the record from the to_buy table that matches the given item_id
     cursor.execute(
-            '''
-            SELECT id, name, quantity, price
-            FROM inventory
-            '''
-        )
+        '''
+        DELETE FROM to_buy
+        WHERE item_id = ?
+        ''', 
+        (item_id,)
+    )
+
+    # Save Changes to Database and Close Connection
+    conn.commit()
+    conn.close()
+
+def get_to_buy_list():
+    # Connect to Inventory Database
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor() 
+
+    # Retrieves the To-Buy List from the database by joining the to_buy table with the inventory table to get the details of each item in the To-Buy list
+    cursor.execute(
+        '''
+        SELECT inventory.id, inventory.name, inventory.quantity, inventory.price
+        FROM to_buy
+        JOIN inventory ON to_buy.item_id = inventory.id
+        '''
+    )
     
     results = cursor.fetchall()
 
     # Save Changes to Database and Close Connection
     conn.close()
     return results
-
-#Dohyeon was here
