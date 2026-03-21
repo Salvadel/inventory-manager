@@ -100,7 +100,7 @@ def new_category(category_name):
     return database.add_category(category_name)
 
 # A function to delete a category, it takes the category_name as input, validates it using the security module, and then calls the database function to delete the specified category from the database
-def delete_category(category_name):
+def remove_category(category_name):
     # Validate category name before deleting from database
     security.validate_name(category_name)
     return database.delete_category(category_name)
