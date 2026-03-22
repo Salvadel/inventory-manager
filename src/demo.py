@@ -39,7 +39,8 @@ def inventory_menu():
         print('1. View Inventory')
         print('2. Add Item')
         print('3. Delete Item')
-        print('4. Logout')
+        print('4. Search Database')
+        print('5. Logout')
 
         # Take user input for menu selection
         choice = input('Select an option: ')
@@ -49,7 +50,7 @@ def inventory_menu():
             items, message = inventory.view_inventory()
             if items:
                 for item in items:
-                    print(f"ID: {item[0]}, Name: {item[1]}, Quantity: {item[2]}, Price: ${item[3]:.2f}")
+                    print(f"ID: {item[0]}, Name: {item[1]}, Quantity: {item[2]}, Added: {item[3]}, Category: {item[6]}, Vendor: {item[7]}")
             else:
                 print(message)
         # If choice 2 add a new inventory item, take in quantity, price, and name as input and validate them before adding to inventory
@@ -57,8 +58,12 @@ def inventory_menu():
             try:
                 name = input('Item Name: ')
                 quantity = int(input('Quantity: '))
-                price = float(input('Price: '))
-                inventory.add_inventory_item(name, price, quantity)
+                date_added = input('Date Added (YYYY-MM-DD): ')
+                date_expired = input('Expiry Date (YYYY-MM-DD): ').strip()
+                location = int(input('Location (enter a number): '))
+                category = input('Category: ')
+                vendor = input('Vendor: ')
+                inventory.add_inventory_item(name, quantity, date_added, date_expired, location, category, vendor)
                 print('Item added successfully.')
             except ValueError as e:
                 print(f"Input Error: {e}")
@@ -67,8 +72,20 @@ def inventory_menu():
             item_id = int(input('Item ID to delete: '))
             inventory.remove_inventory_item(item_id)
             print('Item deleted successfully.')
-        # If choice 4 log out and return to login menu
+        # If choice is 4 search the database for the item id and return the item
         elif choice == '4':
+            keyword = input('Enter search keyword: ')
+            try:
+                results = inventory.search_inventory(keyword)
+                if results:
+                    for item in results:
+                        print(f"ID: {item[0]}, Name: {item[1]}, Quantity: {item[2]}")
+                else:
+                    print('No items found matching that keyword.')
+            except ValueError as e:
+                print(f"Input Error: {e}")
+        # If choice 5 log out and return to login menu
+        elif choice == '5':
             print('Logging out...')
             break
         # If the user enters an invalid option print an error message and return to inventory menu
