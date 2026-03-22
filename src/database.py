@@ -33,7 +33,7 @@ def init_database():
             '''
             CREATE TABLE IF NOT EXISTS users 
                 (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL,
                 salt TEXT NOT NULL
@@ -46,10 +46,14 @@ def init_database():
             '''
             CREATE TABLE IF NOT EXISTS inventory 
                 (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                item_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 quantity INTEGER NOT NULL,
-                price REAL NOT NULL
+                date_added DATE NOT NULL,
+                date_expired DATE,
+                location INT NOT NULL,
+                category VARCHAR(15) NOT NULL,
+                vendor VARCHAR(20) NOT NULL
                 )
             '''
         )
@@ -59,10 +63,10 @@ def init_database():
             '''
             CREATE TABLE IF NOT EXISTS vendors 
                 (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                vendor_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 item_id INTEGER,
-                vendor TEXT,
-                FOREIGN KEY (item_id) REFERENCES inventory(id)
+                vendor VARCHAR(20),
+                FOREIGN KEY (item_id) REFERENCES inventory(item_id)
                 )
             '''
         )
@@ -72,9 +76,9 @@ def init_database():
             '''
             CREATE TABLE IF NOT EXISTS to_buy 
             (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                list_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 item_id INTEGER,
-                FOREIGN KEY (item_id) REFERENCES inventory(id)
+                FOREIGN KEY (item_id) REFERENCES inventory(item_id)
             )
             '''
         )
@@ -93,7 +97,7 @@ def get_user(username):
     # Retrieves the User from the Database and Returns User Records
     cursor.execute(
         '''
-        SELECT id, username, password, salt
+        SELECT user_id, username, password, salt
         FROM users
         WHERE username = ?
         ''', 
@@ -115,13 +119,17 @@ def add_item(item_data):
     # Inserts New Inventory Items into the Database, including price, quantity, and name
     cursor.execute(
         '''
-        INSERT INTO inventory (name, quantity, price)
-        VALUES (?, ?, ?)
+        INSERT INTO inventory (name, quantity, date_added, date_expired, location, category, vendor)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         ''', 
         (
         item_data['name'],
         item_data['quantity'],
-        item_data['price']
+        item_data['date_added'],
+        item_data['date_expired'],
+        item_data['location'],
+        item_data['category'],
+        item_data['vendor']
         )
     )
 
@@ -133,13 +141,13 @@ def add_item(item_data):
 def remove_item(item_id):
     # Connect to Inventory Database
     conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
+    cursor = conn.cursor() 
 
     # Deletes Inventory Item from Database based on the item_id
     cursor.execute(
         '''
         DELETE FROM inventory
-        WHERE id = ?
+        WHERE item_id = ?
         ''', 
         (item_id,)
     )
@@ -157,13 +165,12 @@ def search_items(keyword):
     # Returns Matching Inventory Records based on the Keyword Search using a LIKE query to find items that contain the keyword in their name
     cursor.execute(
         '''
-        SELECT id, name, quantity, price
+        SELECT item_id, name, quantity
         FROM inventory
-        WHERE name LIKE ?
+        WHERE name inventory ?
         ''', 
         (f"%{keyword}%",)
     )
-    
     results = cursor.fetchall()
 
     # Save Changes to Database and Close Connection
@@ -217,7 +224,7 @@ def get_all_items():
     # Returns all inventory items from the database
     cursor.execute(
             '''
-            SELECT id, name, quantity, price
+            SELECT item_id, name, quantity, date_added, date_expired, location, category, vendor
             FROM inventory
             '''
         )
