@@ -38,16 +38,21 @@ def startup():
     database.init_database()
 
 #A function to add an inventory item, it validates the input data for name, price, and quantity using the security module before sending the item data to the database for storage. It ensures that only valid data is added to the inventory.
-def add_inventory_item(name, price, quantity):
+def add_inventory_item(name, quantity, date_added=None, date_expired=None, location=0, category='General', vendor='Unknown'):
+
+    
     # Validate item data before adding to inventory
     security.validate_name(name)
-    security.validate_price(price)
     security.validate_quantity(quantity)
 
     return database.add_item({
         'name': name,
-        'price': price,
-        'quantity': quantity
+        'quantity': quantity,
+        'date_added': date_added,
+        'date_expired': date_expired,
+        'location': location,
+        'category': category,
+        'vendor': vendor
     })
 
 # A function to remove an inventory item, it takes the item_id as input and calls the database function to remove the item from the inventory
