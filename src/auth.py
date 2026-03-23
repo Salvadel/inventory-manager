@@ -1,9 +1,6 @@
 '''
-Thie file contains the authentication functions. It includes functions for hashing passwords, 
-verifying passwords, and handling user login. The password hashing uses PBKDF2 with SHA-256 
-and a unique salt for each password to enhance security against brute-force attacks. 
-The login function checks the provided credentials against the stored hash and salt in the 
-database and returns appropriate messages based on the outcome of the login attempt.
+auth.py purpose:
+Handles user authentication, including password hashing and verification, and user login functionality
 '''
 import hashlib
 import hmac

@@ -1,13 +1,6 @@
 '''
-This file contains the main application logic for the Inventory Management System. 
-It provides a command-line interface (CLI) for users to interact with the system, 
-allowing them to log in, manage inventory items, categories, vendors, and a to-buy list. 
-The application is structured with a main menu that branches into submenus for different 
-functionalities, such as viewing inventory, adding items, managing categories and vendors, 
-and handling the to-buy list. User inputs are validated and appropriate messages are 
-displayed based on the actions taken. The application relies on functions defined in the 
-auth.py and inventory.py modules to perform operations related to authentication and 
-inventory management.
+demo.py purpose:
+Provides a command-line interface for users to interact with the inventory management system, for demo purposes. Not permanent.
 '''
 import auth
 import inventory

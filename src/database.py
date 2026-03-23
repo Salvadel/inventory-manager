@@ -1,7 +1,6 @@
 '''
-The purpose of database.py is to handle all interactions with the SQLite database, 
-including initializing the database, performing operations on inventory items, managing 
-vendors, and handling the To-Buy list. It serves as the data layer of the application.
+database.py purpose:
+Handles all interactions with the SQLite database, data access layer and handles all inventory data storage and retrieval operations.
 '''
 import sqlite3
 from pathlib import Path
