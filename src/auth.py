@@ -1,32 +1,10 @@
-"""
-auth.py purpose:
-Handles user authentication and login validation.
-
-Key features:
-- Validate user login
-- Secure password comparison
-- Generate secure tokens
-
-
-def login_user(username: str, password: str) -> bool:
-    input: username (str), password (str)
-    output: bool
-    use: Verifies user credentials against stored database record
-    pass
-
-def verify_password(password:str, stored_hash: bytes, stored_salt: bytes):
-    input: password (str), stored_hash (bytes), stored_salt (bytes)
-    output: bool
-    use: Compares provided password with securely stored hash and salt
-    pass
-
-def hash_password(password: str) -> str:
-    input: password (str)
-    output: str
-    use: Returns securely hashed password
-    pass
-"""
-
+'''
+Thie file contains the authentication functions. It includes functions for hashing passwords, 
+verifying passwords, and handling user login. The password hashing uses PBKDF2 with SHA-256 
+and a unique salt for each password to enhance security against brute-force attacks. 
+The login function checks the provided credentials against the stored hash and salt in the 
+database and returns appropriate messages based on the outcome of the login attempt.
+'''
 import hashlib
 import hmac
 import secrets
