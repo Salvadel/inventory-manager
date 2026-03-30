@@ -39,6 +39,23 @@ def remove_inventory_item(item_id):
     security.validate_item_id(item_id)
     return database.remove_item(item_id)
 
+# Function to update an inventory item, it validates the input data for name, price, and quantity using the security module before sending the updated item data to the database for storage. It ensures that only valid data is used to update the inventory.
+def update_inventory_item(item_id, name=None, quantity=None, date_added=None, date_expired=None, location=None, category=None, vendor=None):
+    security.validate_item_id(item_id)
+    if name is not None:
+        security.validate_name(name)
+    if quantity is not None:
+        security.validate_quantity(quantity)
+    return database.update_item(item_id, {
+        'name': name,
+        'quantity': quantity,
+        'date_added': date_added,
+        'date_expired': date_expired,
+        'location': location,
+        'category': category,
+        'vendor': vendor
+    })
+
 # A function to search for inventory items by name, it validates the input name and then calls the database function to search for items that match the given name, returning the results to the caller
 def search_inventory(name):
     security.validate_name(name)
@@ -121,5 +138,13 @@ def remove_item_from_to_buy_list(item_id):
     security.validate_item_id(item_id)
     return database.remove_from_to_buy(item_id)
 
+# Returns a list of items currently in the to-buy list, or an empty list if there are none
 def view_to_buy_list():
     return database.get_to_buy_list()
+
+# A function to export the to-buy list to a PDF file, it takes a filename as input and calls the database function to retrieve the items in the to-buy list, then formats that data into a PDF document and saves it with the given filename
+def export_to_buy_list(filename):
+    items = database.get_to_buy_list()
+    if not items:
+        return False, "To-Buy List is empty."
+    return database.export_to_pdf(items, filename)

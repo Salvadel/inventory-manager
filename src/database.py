@@ -2,9 +2,10 @@
 database.py purpose:
 Handles all interactions with the SQLite database, data access layer and handles all inventory data storage and retrieval operations.
 '''
-import sqlite3
-from pathlib import Path
-from contextlib import contextmanager
+import sqlite3 # For SQLite database operations
+from pathlib import Path # For handling file paths
+from contextlib import contextmanager # For managing database connections
+from fpdf import FPDF # For PDF export functionality
 
 DB_NAME = Path(__file__).parent.parent / 'docs' / 'data' / 'inventory.db'
 
@@ -122,8 +123,8 @@ def update_item(item_id, item_data):
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('''
-            UPDATE inventory SET name = ?, quantity = ? WHERE item_id = ?
-        ''', (item_data['name'], item_data['quantity'], item_id))
+            UPDATE inventory SET quantity = ? WHERE item_id = ?
+        ''', (item_data['quantity'], item_id))
 
 # A function to retrieve all inventory items from the database, it connects to the database, executes a query to select all items, and returns the results
 def get_all_items():
@@ -189,6 +190,18 @@ def get_to_buy_list():
             JOIN inventory ON to_buy.item_id = inventory.item_id
         ''')
         return cursor.fetchall()
+    
+# A function to export the To-Buy list to a PDF file, it takes a filename as input and calls the database function to retrieve the items in the To-Buy list, then formats that data into a PDF document and saves it with the given filename
+def export_to_pdf(items, filename):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt="To-Buy List", ln=True, align='C')
+    pdf.ln(10)
+    for item in items:
+        item_id, name, quantity = item
+        pdf.cell(200, 10, txt=f"{item_id}: {name} (Quantity: {quantity})", ln=True)
+    pdf.output(f"{filename}.pdf")
 
 # A function to add a new category to the database, it takes the category name as input and inserts a new record into the categories table with the provided category name
 def add_category(category_name):

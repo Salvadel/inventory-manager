@@ -47,11 +47,12 @@ def inventory_menu():
         print('1. View Inventory')
         print('2. Add Item')
         print('3. Delete Item')
-        print('4. Search Database')
-        print('5. Manage Categories')
-        print('6. Manage Vendors')
-        print('7. To-Buy List')
-        print('8. Logout')
+        print('4. Update Inventory Quantity')
+        print('5. Search Database')
+        print('6. Manage Categories')
+        print('7. Manage Vendors')
+        print('8. To-Buy List')
+        print('9. Logout')
 
         # Take user input for menu selection
         choice = input('Select an option: ')
@@ -86,8 +87,17 @@ def inventory_menu():
                 print('Item deleted successfully.')
             except ValueError:
                 print('Invalid ID. Please enter a number.')
-        # If choice is 4 search the database for the item id and return the item
+        # If choice 4 update the quantity of an existing inventory item, take in item id and new quantity as input and validate them before updating inventory
         elif choice == '4':
+            try:
+                item_id = int(input('Item ID to update: '))
+                new_quantity = int(input('New Quantity: '))
+                inventory.update_inventory_item(item_id, quantity=new_quantity)
+                print('Item updated successfully.')
+            except ValueError:
+                print('Invalid input. Please enter numbers for ID and quantity.')
+        # If choice is 5 search the database for the item id and return the item
+        elif choice == '5':
             keyword = input('Enter search keyword: ')
             try:
                 results = inventory.search_inventory(keyword)
@@ -98,17 +108,17 @@ def inventory_menu():
                     print('No items found matching that keyword.')
             except ValueError as e:
                 print(f"Input Error: {e}")
-        # If choice 5 open the category management submenu
-        elif choice == '5':
-            category_menu()
-        # If choice 6 open the vendor management submenu
+        # If choice 6 open the category management submenu
         elif choice == '6':
-            vendor_menu()
-        # If choice 7 open the to-buy list submenu
+            category_menu()
+        # If choice 7 open the vendor management submenu
         elif choice == '7':
-            to_buy_menu()
-        # If choice 8 log out and return to login menu
+            vendor_menu()
+        # If choice 8 open the to-buy list submenu
         elif choice == '8':
+            to_buy_menu()
+        # If choice 9 log out and return to login menu
+        elif choice == '9':
             print('Logging out...')
             break
         # If the user enters an invalid option print an error message and return to inventory menu
@@ -235,7 +245,8 @@ def to_buy_menu():
         print('1. View To-Buy List')
         print('2. Add Item to To-Buy List')
         print('3. Remove Item from To-Buy List')
-        print('4. Back')
+        print('4. Export To-Buy List to PDF')
+        print('5. Back')
 
         choice = input('Select an option: ')
 
@@ -263,8 +274,13 @@ def to_buy_menu():
                 print(f"Item {item_id} removed from To-Buy List successfully.")
             except ValueError:
                 print('Invalid ID. Please enter a number.')
-        # Return to inventory menu
+        # Export the to-buy list to PDF
         elif choice == '4':
+            filename = input('Enter filename for PDF (without extension): ')
+            inventory.export_to_buy_list(filename)
+            print(f"To-Buy List exported to '{filename}.pdf' successfully.")
+        # Return to inventory menu
+        elif choice == '5':
             break
         else:
             print('Invalid option. Please try again.')
