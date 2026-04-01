@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from auth import login_user
-from inventory import add_item
+import inventory
 """
 gui.py purpose:
 Handles graphical user interface.
@@ -33,3 +33,4 @@ def show_inventory_screen() -> None:
     use: Displays inventory management interface
     pass
 """
+inventory.search_inventory()
