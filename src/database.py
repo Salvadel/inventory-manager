@@ -257,3 +257,76 @@ def get_items_by_category(category_id):
             WHERE item_categories.category_id = ?
         ''', (category_id,))
         return cursor.fetchall()
+
+# SORTING ITEMS 
+
+def sort_items_by_expiration():
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT item_id, name, quantity, date_added, date_expired, location, category, vendor
+            FROM inventory
+            ORDER BY date_expired ASC
+        ''')
+        return cursor.fetchall()
+    
+def sort_items_by_date_added():
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT item_id, name, quantity, date_added, date_expired, location, category, vendor
+            FROM inventory
+            ORDER BY date_added DESC
+        ''')
+        return cursor.fetchall()
+    
+def sort_items_by_name():
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT item_id, name, quantity, date_added, date_expired, location, category, vendor
+            FROM inventory
+            ORDER BY name ASC
+        ''')
+        return cursor.fetchall()
+
+def sort_items_by_quantity():
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT item_id, name, quantity, date_added, date_expired, location, category, vendor
+            FROM inventory
+            ORDER BY quantity DESC
+        ''')
+        return cursor.fetchall()
+
+def sort_items_by_location():
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT item_id, name, quantity, date_added, date_expired, location, category, vendor
+            FROM inventory
+            ORDER BY location ASC
+        ''')
+        return cursor.fetchall()
+    
+def sort_items_by_category():
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT item_id, name, quantity, date_added, date_expired, location, category, vendor
+            FROM inventory
+            ORDER BY category ASC
+        ''')
+        return cursor.fetchall()
+    
+def sort_items_by_vendor():
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT item_id, name, quantity, date_added, date_expired, location, category, vendor
+            FROM inventory
+            ORDER BY vendor ASC
+        ''')
+        return cursor.fetchall()
+    
