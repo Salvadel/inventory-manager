@@ -78,6 +78,10 @@ def init_database():
             )
         ''')
 
+# ---------------------------------------------------------------------------------------------------------------
+# USER FUNCTIONS
+# ---------------------------------------------------------------------------------------------------------------
+
 # A function to retrieve the user from the database and returns user records for login
 def get_user(username):
     with get_connection() as conn:
@@ -94,6 +98,10 @@ def create_user(username, hashed_password, salt):
         cursor.execute('''
             INSERT INTO users (username, password, salt) VALUES (?, ?, ?)
         ''', (username, hashed_password.hex(), salt.hex()))
+
+# ---------------------------------------------------------------------------------------------------------------
+# ITEM MANAGEMENT FUNCTIONS
+# ---------------------------------------------------------------------------------------------------------------
 
 # A function to add an item to the inventory, it takes item data as input, connects to the database, and inserts a new record into the inventory table with the provided item details such as name, quantity, and price
 def add_item(item_data):
@@ -136,6 +144,10 @@ def get_all_items():
         ''')
         return cursor.fetchall()
 
+# ---------------------------------------------------------------------------------------------------------------
+# SEARCH ITEMS FUNCTIONS
+# ---------------------------------------------------------------------------------------------------------------
+
 # A function to return matching inventory records based on the Keyword Search
 def search_items(keyword):
     with get_connection() as conn:
@@ -144,6 +156,10 @@ def search_items(keyword):
             SELECT item_id, name, quantity FROM inventory WHERE name LIKE ?
         ''', (f"%{keyword}%",))
         return cursor.fetchall()
+
+# ---------------------------------------------------------------------------------------------------------------
+# VENDOR FUNCTIONS
+# ---------------------------------------------------------------------------------------------------------------
 
 # A function to associate a vendor with an item, updates both the vendors table and the inventory row so view_inventory reflects the change
 def add_vendor(item_id, vendor):
@@ -167,6 +183,10 @@ def update_vendor(item_id, old_vendor, new_vendor):
             UPDATE vendors SET vendor = ? WHERE item_id = ? AND vendor = ?
         ''', (new_vendor, item_id, old_vendor))
         cursor.execute('UPDATE inventory SET vendor = ? WHERE item_id = ?', (new_vendor, item_id))
+
+# ---------------------------------------------------------------------------------------------------------------
+# TO-BUY LIST FUNCTIONS
+# ---------------------------------------------------------------------------------------------------------------
 
 # A function to add an item to the To-Buy list in the database, it inserts a new record into the to_buy table with the item_id of the item that needs to be purchased
 def add_to_buy(item_id):
@@ -202,6 +222,10 @@ def export_to_pdf(items, filename):
         item_id, name, quantity = item
         pdf.cell(200, 10, txt=f"{item_id}: {name} (Quantity: {quantity})", ln=True)
     pdf.output(f"{filename}.pdf")
+
+# ---------------------------------------------------------------------------------------------------------------
+# ITEM CATEGORIES FUNCTIONS
+# ---------------------------------------------------------------------------------------------------------------
 
 # A function to add a new category to the database, it takes the category name as input and inserts a new record into the categories table with the provided category name
 def add_category(category_name):
@@ -258,9 +282,12 @@ def get_items_by_category(category_id):
         ''', (category_id,))
         return cursor.fetchall()
 
-# SORTING ITEMS 
+# ---------------------------------------------------------------------------------------------------------------
+# SORTING ITEMS FUNCTIONS
+# ---------------------------------------------------------------------------------------------------------------
 
-def sort_items_by_expiration():
+# A function to sort items by expiration date, it connects to the database, retrieves all items from the inventory table, and sorts them in ascending order based on their expiration date, returning the sorted list of items
+def sort_by_expiration():
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -270,7 +297,8 @@ def sort_items_by_expiration():
         ''')
         return cursor.fetchall()
     
-def sort_items_by_date_added():
+# A function to sort items by date added, it connects to the database, retrieves all items from the inventory table, and sorts them in descending order based on their date added, returning the sorted list of items
+def sort_by_date_added():
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -280,7 +308,8 @@ def sort_items_by_date_added():
         ''')
         return cursor.fetchall()
     
-def sort_items_by_name():
+# A function to sort items by name, it connects to the database, retrieves all items from the inventory table, and sorts them in ascending order based on their name, returning the sorted list of items
+def sort_by_name():
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -290,7 +319,8 @@ def sort_items_by_name():
         ''')
         return cursor.fetchall()
 
-def sort_items_by_quantity():
+# A function to sort items by quantity, it connects to the database, retrieves all items from the inventory table, and sorts them in descending order based on their quantity, returning the sorted list of items
+def sort_by_quantity():
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -300,7 +330,8 @@ def sort_items_by_quantity():
         ''')
         return cursor.fetchall()
 
-def sort_items_by_location():
+# A function to sort items by location, it connects to the database, retrieves all items from the inventory table, and sorts them in ascending order based on their location, returning the sorted list of items
+def sort_by_location():
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -309,8 +340,9 @@ def sort_items_by_location():
             ORDER BY location ASC
         ''')
         return cursor.fetchall()
-    
-def sort_items_by_category():
+
+# A function to sort items by category, it connects to the database, retrieves all items from the inventory table, and sorts them in ascending order based on their category, returning the sorted list of items
+def sort_by_category():
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -319,8 +351,9 @@ def sort_items_by_category():
             ORDER BY category ASC
         ''')
         return cursor.fetchall()
-    
-def sort_items_by_vendor():
+
+# A function to sort items by vendor, it connects to the database, retrieves all items from the inventory table, and sorts them in ascending order based on their vendor, returning the sorted list of items
+def sort_by_vendor():
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -330,3 +363,12 @@ def sort_items_by_vendor():
         ''')
         return cursor.fetchall()
     
+def sort_by_id():
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT item_id, name, quantity, date_added, date_expired, location, category, vendor
+            FROM inventory
+            ORDER BY item_id ASC
+        ''')
+        return cursor.fetchall()

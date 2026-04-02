@@ -53,6 +53,7 @@ def inventory_menu():
         print('7. Manage Vendors')
         print('8. To-Buy List')
         print('9. Logout')
+        print ('10. View Sorted Inventory')
 
         # Take user input for menu selection
         choice = input('Select an option: ')
@@ -121,6 +122,28 @@ def inventory_menu():
         elif choice == '9':
             print('Logging out...')
             break
+        elif choice == '10':
+            sort_options = {
+                '1': ('Expiration Date', inventory.sort_items_by_expiration),
+                '2': ('Date Added', inventory.sort_items_by_date_added),
+                '3': ('Name', inventory.sort_items_by_name),
+                '4': ('Quantity', inventory.sort_items_by_quantity),
+                '5': ('Location', inventory.sort_items_by_location),
+                '6': ('Category', inventory.sort_items_by_category),
+                '7': ('Vendor', inventory.sort_items_by_vendor),
+                '8': ('ID', inventory.sort_items_by_id)
+            }
+            print("Sort Inventory By:")
+            for key, (name, _) in sort_options.items():
+                print(f"{key}. {name}")
+            sort_choice = input('Select a sorting option: ')
+            if sort_choice in sort_options:
+                _, sort_function = sort_options[sort_choice]
+                sorted_items = sort_function()
+                for item in sorted_items:
+                    print(f"ID: {item[0]}, Name: {item[1]}, Quantity: {item[2]}, Date Added: {item[3]}, Expiry: {item[4]}, Location: {item[5]}, Category: {item[6]}, Vendor: {item[7]}")
+            else:
+                print('Invalid sorting option. Please try again.')
         # If the user enters an invalid option print an error message and return to inventory menu
         else:
             print('Invalid option. Please try again.')

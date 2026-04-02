@@ -10,6 +10,10 @@ import security
 def startup():
     database.init_database()
 
+# ---------------------------------------------------------------------------------------------------------------
+# USER FUNCTIONS
+# ---------------------------------------------------------------------------------------------------------------
+
 # Hashes the password and stores the new user in the database, skips if the user already exists
 def create_default_user(username, password):
     import auth
@@ -19,6 +23,10 @@ def create_default_user(username, password):
         return True, "User created!"
     except Exception:
         return False, "User already exists."
+
+# ---------------------------------------------------------------------------------------------------------------
+# ITEM MANAGEMENT FUNCTIONS
+# ---------------------------------------------------------------------------------------------------------------
 
 # A function to add an inventory item, it validates the input data for name, price, and quantity using the security module before sending the item data to the database for storage. It ensures that only valid data is added to the inventory.
 def add_inventory_item(name, quantity, date_added=None, date_expired=None, location='Unknown', category='General', vendor='Unknown'):
@@ -56,17 +64,73 @@ def update_inventory_item(item_id, name=None, quantity=None, date_added=None, da
         'vendor': vendor
     })
 
-# A function to search for inventory items by name, it validates the input name and then calls the database function to search for items that match the given name, returning the results to the caller
-def search_inventory(name):
-    security.validate_name(name)
-    return database.search_items(name)
-
 # A function to view all inventory items, it calls the database function to retrieve all items in the inventory and returns them to the caller. If there are no items, it returns a message indicating that the inventory is empty
 def view_inventory():
     items = database.get_all_items()
     if not items:
         return None, "No items in inventory."
     return items, None
+
+# ---------------------------------------------------------------------------------------------------------------
+# SEARCH ITEMS FUNCTIONS
+# ---------------------------------------------------------------------------------------------------------------
+
+# A function to search for inventory items by name, it validates the input name and then calls the database function to search for items that match the given name, returning the results to the caller
+def search_inventory(name):
+    security.validate_name(name)
+    return database.search_items(name)
+
+# ---------------------------------------------------------------------------------------------------------------
+# VENDOR FUNCTIONS
+# ---------------------------------------------------------------------------------------------------------------
+
+# Validates inputs then adds a vendor association to an item
+def add_vendor_to_item(item_id, vendor_name):
+    security.validate_item_id(item_id)
+    security.validate_vendor_name(vendor_name)
+    return database.add_vendor(item_id, vendor_name)
+
+# Validates inputs then removes a vendor association from an item
+def remove_vendor_from_item(item_id, vendor_name):
+    security.validate_item_id(item_id)
+    security.validate_vendor_name(vendor_name)
+    return database.remove_vendor(item_id, vendor_name)
+
+# Validates inputs then updates the vendor name on an item
+def update_vendor_for_item(item_id, old_vendor_name, new_vendor_name):
+    security.validate_item_id(item_id)
+    security.validate_vendor_name(old_vendor_name)
+    security.validate_vendor_name(new_vendor_name)
+    return database.update_vendor(item_id, old_vendor_name, new_vendor_name)
+
+# ---------------------------------------------------------------------------------------------------------------
+# TO-BUY LIST FUNCTIONS
+# ---------------------------------------------------------------------------------------------------------------
+
+# Validates the item ID then adds it to the to-buy list
+def add_item_to_buy_list(item_id):
+    security.validate_item_id(item_id)
+    return database.add_to_buy(item_id)
+
+# Validates the item ID then removes it from the to-buy list
+def remove_item_from_to_buy_list(item_id):
+    security.validate_item_id(item_id)
+    return database.remove_from_to_buy(item_id)
+
+# Returns a list of items currently in the to-buy list, or an empty list if there are none
+def view_to_buy_list():
+    return database.get_to_buy_list()
+
+# A function to export the to-buy list to a PDF file, it takes a filename as input and calls the database function to retrieve the items in the to-buy list, then formats that data into a PDF document and saves it with the given filename
+def export_to_buy_list(filename):
+    items = database.get_to_buy_list()
+    if not items:
+        return False, "To-Buy List is empty."
+    return database.export_to_pdf(items, filename)
+
+# ---------------------------------------------------------------------------------------------------------------
+# ITEM CATEGORIES FUNCTIONS
+# ---------------------------------------------------------------------------------------------------------------
 
 # Returns a flat list of all category name strings
 def get_all_categories():
@@ -109,42 +173,38 @@ def get_all_items_by_category(category_name):
         return []
     return database.get_items_by_category(category_id)
 
-# Validates inputs then adds a vendor association to an item
-def add_vendor_to_item(item_id, vendor_name):
-    security.validate_item_id(item_id)
-    security.validate_vendor_name(vendor_name)
-    return database.add_vendor(item_id, vendor_name)
+# ---------------------------------------------------------------------------------------------------------------
+# SORTING ITEMS FUNCTIONS
+# ---------------------------------------------------------------------------------------------------------------
 
-# Validates inputs then removes a vendor association from an item
-def remove_vendor_from_item(item_id, vendor_name):
-    security.validate_item_id(item_id)
-    security.validate_vendor_name(vendor_name)
-    return database.remove_vendor(item_id, vendor_name)
+# A function to sort items by expiration date, it connects to the database, retrieves all items from the inventory table, and sorts them in ascending order based on their expiration date, returning the sorted list of items
+def sort_items_by_expiration():
+    return database.sort_by_expiration()
 
-# Validates inputs then updates the vendor name on an item
-def update_vendor_for_item(item_id, old_vendor_name, new_vendor_name):
-    security.validate_item_id(item_id)
-    security.validate_vendor_name(old_vendor_name)
-    security.validate_vendor_name(new_vendor_name)
-    return database.update_vendor(item_id, old_vendor_name, new_vendor_name)
+# A function to sort items by date added, it connects to the database, retrieves all items from the inventory table, and sorts them in descending order based on their date added, returning the sorted list of items
+def sort_items_by_date_added():
+    return database.sort_by_date_added()
 
-# Validates the item ID then adds it to the to-buy list
-def add_item_to_buy_list(item_id):
-    security.validate_item_id(item_id)
-    return database.add_to_buy(item_id)
+# A function to sort items by name, it connects to the database, retrieves all items from the inventory table, and sorts them in ascending order based on their name, returning the sorted list of items
+def sort_items_by_name():
+    return database.sort_by_name()
 
-# Validates the item ID then removes it from the to-buy list
-def remove_item_from_to_buy_list(item_id):
-    security.validate_item_id(item_id)
-    return database.remove_from_to_buy(item_id)
+# A function to sort items by quantity, it connects to the database, retrieves all items from the inventory table, and sorts them in descending order based on their quantity, returning the sorted list of items
+def sort_items_by_quantity():
+    return database.sort_by_quantity()
 
-# Returns a list of items currently in the to-buy list, or an empty list if there are none
-def view_to_buy_list():
-    return database.get_to_buy_list()
+# A function to sort items by location, it connects to the database, retrieves all items from the inventory table, and sorts them in ascending order based on their location, returning the sorted list of items
+def sort_items_by_location():
+    return database.sort_by_location()
 
-# A function to export the to-buy list to a PDF file, it takes a filename as input and calls the database function to retrieve the items in the to-buy list, then formats that data into a PDF document and saves it with the given filename
-def export_to_buy_list(filename):
-    items = database.get_to_buy_list()
-    if not items:
-        return False, "To-Buy List is empty."
-    return database.export_to_pdf(items, filename)
+# A function to sort items by category, it connects to the database, retrieves all items from the inventory table, and sorts them in ascending order based on their category, returning the sorted list of items
+def sort_items_by_category():
+    return database.sort_by_category()
+
+# A function to sort items by vendor, it connects to the database, retrieves all items from the inventory table, and sorts them in ascending order based on their vendor, returning the sorted list of items
+def  sort_items_by_vendor():
+    return database.sort_by_vendor()
+
+# A function to sort items by ID, it connects to the database, retrieves all items from the inventory table, and sorts them in ascending order based on their ID, returning the sorted list of items
+def sort_items_by_id():
+    return database.sort_by_id()
