@@ -372,3 +372,47 @@ def sort_by_id():
             ORDER BY item_id ASC
         ''')
         return cursor.fetchall()
+
+# ---------------------------------------------------------------------------------------------------------------
+# FILTER ITEMS FUNCTIONS
+# ---------------------------------------------------------------------------------------------------------------
+
+def filter_by_expiration_date(start_date, end_date):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT item_id, name, quantity, date_added, date_expired, location, category, vendor
+            FROM inventory
+            WHERE date_expired BETWEEN ? AND ?
+        ''', (start_date, end_date))
+        return cursor.fetchall()
+    
+def filter_by_category(category_name):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT item_id, name, quantity, date_added, date_expired, location, category, vendor
+            FROM inventory
+            WHERE category = ?
+        ''', (category_name,))
+        return cursor.fetchall()
+    
+def filter_by_vendor(vendor_name):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT item_id, name, quantity, date_added, date_expired, location, category, vendor
+            FROM inventory
+            WHERE vendor = ?
+        ''', (vendor_name,))
+        return cursor.fetchall()
+    
+def filter_by_location(location):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT item_id, name, quantity, date_added, date_expired, location, category, vendor
+            FROM inventory
+            WHERE location = ?
+        ''', (location,))
+        return cursor.fetchall()

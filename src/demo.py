@@ -54,6 +54,7 @@ def inventory_menu():
         print('8. To-Buy List')
         print('9. Logout')
         print ('10. View Sorted Inventory')
+        print ('11. Filter Inventory') 
 
         # Take user input for menu selection
         choice = input('Select an option: ')
@@ -144,6 +145,34 @@ def inventory_menu():
                     print(f"ID: {item[0]}, Name: {item[1]}, Quantity: {item[2]}, Date Added: {item[3]}, Expiry: {item[4]}, Location: {item[5]}, Category: {item[6]}, Vendor: {item[7]}")
             else:
                 print('Invalid sorting option. Please try again.')
+        elif choice == '11':
+            print("Filter Inventory By:")
+            print("1. Expiration Date")
+            print("2. Location")
+            print("3. Category")
+            print("4. Vendor")
+            filter_choice = input('Select a filtering option: ')
+            filtered_items = []
+            if filter_choice == '1':
+                start_date = input('Start Date (YYYY-MM-DD): ')
+                end_date = input('End Date (YYYY-MM-DD): ')
+                filtered_items = inventory.filter_items_by_expiration(start_date, end_date)
+            elif filter_choice == '2':
+                location = input('Location: ')
+                filtered_items = inventory.filter_items_by_location(location)
+            elif filter_choice == '3':
+                category_name = input('Category: ')
+                filtered_items = inventory.filter_items_by_category(category_name)
+            elif filter_choice == '4':
+                vendor_name = input('Vendor: ')
+                filtered_items = inventory.filter_items_by_vendor(vendor_name)
+            else:
+                print('Invalid filtering option. Please try again.')
+            if filtered_items:
+                for item in filtered_items:
+                    print(f"ID: {item[0]}, Name: {item[1]}, Quantity: {item[2]}, Date Added: {item[3]}, Expiry: {item[4]}, Location: {item[5]}, Category: {item[6]}, Vendor: {item[7]}")
+            elif filter_choice in ('1', '2', '3', '4'):
+                print('No items found matching that filter.')
         # If the user enters an invalid option print an error message and return to inventory menu
         else:
             print('Invalid option. Please try again.')
