@@ -55,7 +55,8 @@ def show_inventory_screen():
 
     tk.Label(top, text="Search:").pack(side="left")
     search_var = tk.StringVar()
-    tk.Entry(top, textvariable=search_var, width=30).pack(side="left", padx=4)
+    search_entry = tk.Entry(top, textvariable=search_var, width=30)
+    search_entry.pack(side="left", padx=4)
 
     tk.Label(top, text="  Sort by:").pack(side="left")
     sort_var = tk.StringVar(value="ID")
@@ -91,10 +92,37 @@ def show_inventory_screen():
         tree.heading(col, text=col)
         tree.column(col, width=w, anchor="center" if col in ("ID","Qty") else "w")
 
+    def load_items(items):
+        tree.delete(*tree.get_children())
+        for row in (items or []):
+            tree.insert("", "end", values=tuple("" if v is None else v for v in row))
+
+    def do_search(*_):
+        query = search_var.get().strip()
+        if query:
+            try:
+                results = inventory.search_inventory(query)
+                load_items(results)
+            except Exception as e:
+                messagebox.showerror("Search Error", str(e))
+        else:
+            items, _ = inventory.view_inventory()
+            load_items(items)
+
     inventory.startup()
     items, _ = inventory.view_inventory()
-    for row in (items or []):
-        tree.insert("", "end", values=tuple("" if v is None else v for v in row))
+    load_items(items)
+
+    def do_reset():
+        search_var.set("")
+        sort_var.set("ID")
+        filter_var.set("All")
+        items, _ = inventory.view_inventory()
+        load_items(items)
+
+    tk.Button(top, text="Search", command=do_search).pack(side="left", padx=2)
+    tk.Button(top, text="Reset", command=do_reset).pack(side="left", padx=2)
+    search_entry.bind("<Return>", do_search)
 
     vsb.pack(side="right",  fill="y")
     hsb.pack(side="bottom", fill="x")
