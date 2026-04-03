@@ -1,7 +1,8 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox, simpledialog
 from auth import login_user
 import inventory
+import database
 """
 gui.py purpose:
 Handles graphical user interface.
@@ -64,9 +65,16 @@ def show_inventory_screen():
 
     tk.Label(top, text="  Category:").pack(side="left")
     filter_var = tk.StringVar(value="All")
-    ttk.Combobox(top, textvariable=filter_var,
-                 values=["All","Raw Materials","Resins","Consumables","Abrasives"],
-                 state="readonly", width=14).pack(side="left", padx=4)
+    filter_cb = ttk.Combobox(top, textvariable=filter_var, state="readonly", width=14)
+    filter_cb.pack(side="left", padx=4)
+
+    def refresh_category_dropdown():
+        cats = ["All"] + [row[0] for row in database.get_categories()]
+        filter_cb["values"] = cats
+        if filter_var.get() not in cats:
+            filter_var.set("All")
+
+    refresh_category_dropdown()
 
     # ── Table ─────────────────────────────────────────────────────────────────
     frame = tk.Frame(root)
