@@ -23,6 +23,15 @@ def create_default_user(username, password):
         return True, "User created!"
     except Exception:
         return False, "User already exists."
+    
+def change_user_password(username, new_password):
+    import auth
+    new_hashed_password, new_salt = auth.hash_password(new_password)
+    try:
+        database.change_password(username, new_hashed_password, new_salt)
+        return True, "Password changed successfully."
+    except Exception:
+        return False, "User not found."
 
 # ---------------------------------------------------------------------------------------------------------------
 # ITEM MANAGEMENT FUNCTIONS

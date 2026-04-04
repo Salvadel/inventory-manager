@@ -99,6 +99,13 @@ def create_user(username, hashed_password, salt):
             INSERT INTO users (username, password, salt) VALUES (?, ?, ?)
         ''', (username, hashed_password.hex(), salt.hex()))
 
+def change_password(username, new_hashed_password, new_salt):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE users SET password = ?, salt = ? WHERE username = ?
+        ''', (new_hashed_password.hex(), new_salt.hex(), username))
+
 # ---------------------------------------------------------------------------------------------------------------
 # ITEM MANAGEMENT FUNCTIONS
 # ---------------------------------------------------------------------------------------------------------------

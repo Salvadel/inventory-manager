@@ -55,6 +55,7 @@ def inventory_menu():
         print('9. Logout')
         print ('10. View Sorted Inventory')
         print ('11. Filter Inventory') 
+        print ('12. Change Password')
 
         # Take user input for menu selection
         choice = input('Select an option: ')
@@ -173,6 +174,14 @@ def inventory_menu():
                     print(f"ID: {item[0]}, Name: {item[1]}, Quantity: {item[2]}, Date Added: {item[3]}, Expiry: {item[4]}, Location: {item[5]}, Category: {item[6]}, Vendor: {item[7]}")
             elif filter_choice in ('1', '2', '3', '4'):
                 print('No items found matching that filter.')
+        elif choice == '12':
+            new_password = getpass('Enter new password: ')
+            confirm_password = getpass('Confirm new password: ')
+            if new_password == confirm_password:
+                success, message = inventory.change_user_password(username, new_password)
+                print(message)
+            else:
+                print('Passwords do not match. Please try again.')
         # If the user enters an invalid option print an error message and return to inventory menu
         else:
             print('Invalid option. Please try again.')
