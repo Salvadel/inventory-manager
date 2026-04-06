@@ -23,6 +23,15 @@ def create_default_user(username, password):
         return True, "User created!"
     except Exception:
         return False, "User already exists."
+    
+def change_user_password(username, new_password):
+    import auth
+    new_hashed_password, new_salt = auth.hash_password(new_password)
+    try:
+        database.change_password(username, new_hashed_password, new_salt)
+        return True, "Password changed successfully."
+    except Exception:
+        return False, "User not found."
 
 # ---------------------------------------------------------------------------------------------------------------
 # ITEM MANAGEMENT FUNCTIONS
@@ -208,3 +217,23 @@ def  sort_items_by_vendor():
 # A function to sort items by ID, it connects to the database, retrieves all items from the inventory table, and sorts them in ascending order based on their ID, returning the sorted list of items
 def sort_items_by_id():
     return database.sort_by_id()
+
+# ---------------------------------------------------------------------------------------------------------------
+# FILTER ITEMS FUNCTIONS
+# ---------------------------------------------------------------------------------------------------------------
+
+# A function to filter items by expiration date, it takes a start date and end date as input, connects to the database, retrieves all items from the inventory table, and filters them to include only those with an expiration date that falls within the specified date range, returning the filtered list of items
+def filter_items_by_expiration(start_date, end_date):
+    return database.filter_by_expiration_date(start_date, end_date)
+
+# A function to filter items by date added, it takes a start date and end date as input, connects to the database, retrieves all items from the inventory table, and filters them to include only those with a date added that falls within the specified date range, returning the filtered list of items
+def filter_items_by_category(category_name):
+    return database.filter_by_category(category_name)
+
+# A function to filter items by vendor, it takes a vendor name as input, connects to the database, retrieves all items from the inventory table, and filters them to include only those with a vendor that matches the specified name, returning the filtered list of items
+def filter_items_by_vendor(vendor_name):
+    return database.filter_by_vendor(vendor_name)
+
+# A function to filter items by location, it takes a location name as input, connects to the database, retrieves all items from the inventory table, and filters them to include only those with a location that matches the specified name, returning the filtered list of items
+def filter_items_by_location(location):
+    return database.filter_by_location(location)
