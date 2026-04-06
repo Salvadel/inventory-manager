@@ -5,38 +5,7 @@ import inventory
 import database
 """
 gui.py purpose:
-Handles graphical user interface.
-
-***
-Used Claude to help code the GUI, but not design the GUI.
-***
-
-Key features:
-- Display login screen
-- Display inventory interface
-- Capture user input
-- Trigger inventory actions
-
-
-def start_gui() -> None:
-    input: None
-    output: None
-    use: Creates and launches main application window
-    pass
-
-
-def show_login_screen() -> None:
-    input: None
-    output: None
-    use: Displays login interface
-    pass
-
-
-def show_inventory_screen() -> None:
-    input: None
-    output: None
-    use: Displays inventory management interface
-    pass
+Contains all code related to the main menu graphical user interface of the application.
 """
 
 COLS   = ("ID", "Name", "Qty", "Date Added", "Expiration", "Location", "Category", "Vendor")
@@ -49,7 +18,7 @@ def show_inventory_screen():
     root.title("Composite Inventory Manager")
     root.geometry("1000x600")
 
-    # ── Search bar ────────────────────────────────────────────────────────────
+    # Search Bar
     top = tk.Frame(root)
     top.pack(fill="x", padx=10, pady=6)
 
@@ -60,8 +29,8 @@ def show_inventory_screen():
     tk.Label(top, text="  Sort by:").pack(side="left")
     sort_var = tk.StringVar(value="ID")
     ttk.Combobox(top, textvariable=sort_var,
-                 values=["ID","Name","Qty","Date Added","Expiration","Location","Category","Vendor"],
-                 state="readonly", width=12).pack(side="left", padx=4)
+        values=["ID","Name","Qty","Date Added","Expiration","Location","Category","Vendor"],
+                state="readonly", width=12).pack(side="left", padx=4)
 
     tk.Label(top, text="  Category:").pack(side="left")
     filter_var = tk.StringVar(value="All")
@@ -76,7 +45,7 @@ def show_inventory_screen():
 
     refresh_category_dropdown()
 
-    # ── Table ─────────────────────────────────────────────────────────────────
+    # Table
     frame = tk.Frame(root)
     frame.pack(fill="both", expand=True, padx=10, pady=4)
 
@@ -100,12 +69,12 @@ def show_inventory_screen():
     hsb.pack(side="bottom", fill="x")
     tree.pack(fill="both", expand=True)
 
-    # ── Buttons ───────────────────────────────────────────────────────────────
+    # Buttons
     bot = tk.Frame(root)
     bot.pack(fill="x", padx=10, pady=6)
 
     for label in ["Add Item", "Edit Item", "Delete Item", "Add to To-Buy List",
-                  "Manage Categories", "Manage Vendors", "View To-Buy List", "Change Password", "Logout"]:
+                "Manage Categories", "Manage Vendors", "View To-Buy List", "Change Password", "Logout"]:
         tk.Button(bot, text=label, width=14).pack(side="left", padx=3)
 
     root.mainloop()
