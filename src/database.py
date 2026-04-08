@@ -252,8 +252,8 @@ def export_to_pdf(items, filename):
     pdf.cell(200, 10, txt="To-Buy List", ln=True, align='C')
     pdf.ln(10)
     for item in items:
-        item_id, name, quantity = item
-        pdf.cell(200, 10, txt=f"{item_id}: {name} (Quantity: {quantity})", ln=True)
+        item_id, name, in_stock, need_to_buy = item
+        pdf.cell(200, 10, txt=f"{item_id}: {name} (In Stock: {in_stock}, Need to Buy: {need_to_buy})", ln=True)
     pdf.output(f"{filename}.pdf")
 
 # ---------------------------------------------------------------------------------------------------------------

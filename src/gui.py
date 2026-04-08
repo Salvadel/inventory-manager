@@ -639,16 +639,24 @@ def show_inventory_screen():
         dialog.grab_set()
         center_on_parent(dialog, 480, 380)
 
+        # Button row packed first so it anchors to the bottom
+        btn_row = tk.Frame(dialog)
+        btn_row.pack(side="bottom", pady=10)
+
+        # Tree area fills the rest
+        tree_frame = tk.Frame(dialog)
+        tree_frame.pack(fill="both", expand=True, padx=10, pady=(10, 0))
+
         cols = ("ID", "Name", "In Stock", "Need to Buy")
-        tree_buy = ttk.Treeview(dialog, columns=cols, show="headings", selectmode="browse", height=12)
+        tree_buy = ttk.Treeview(tree_frame, columns=cols, show="headings", selectmode="browse", height=12)
         for col, w in zip(cols, (40, 200, 80, 100)):
             tree_buy.heading(col, text=col)
             tree_buy.column(col, width=w, anchor="center" if col != "Name" else "w")
 
-        vsb = ttk.Scrollbar(dialog, orient="vertical", command=tree_buy.yview)
+        vsb = ttk.Scrollbar(tree_frame, orient="vertical", command=tree_buy.yview)
         tree_buy.configure(yscrollcommand=vsb.set)
-        tree_buy.pack(side="left", fill="both", expand=True, padx=(10, 0), pady=10)
-        vsb.pack(side="left", fill="y", pady=10, padx=(0, 6))
+        vsb.pack(side="right", fill="y")
+        tree_buy.pack(fill="both", expand=True)
 
         def refresh():
             tree_buy.delete(*tree_buy.get_children())
@@ -661,7 +669,7 @@ def show_inventory_screen():
         def remove_item():
             sel = tree_buy.selection()
             if not sel:
-                messagebox.showwarning("No Selection", "Please select an item to remove.", parent=dialog)
+                messagebox.showwarning("No Selection", "Please select an item to delete.", parent=dialog)
                 return
             item_id = int(tree_buy.item(sel[0], "values")[0])
             try:
@@ -723,10 +731,8 @@ def show_inventory_screen():
             except Exception as e:
                 messagebox.showerror("Error", str(e), parent=dialog)
 
-        btn_row = tk.Frame(dialog)
-        btn_row.pack(pady=(0, 10))
-        tk.Button(btn_row, text="Edit Qty", command=edit_quantity, width=10).pack(side="left", padx=5)
-        tk.Button(btn_row, text="Remove", command=remove_item, width=10,
+        tk.Button(btn_row, text="Edit", command=edit_quantity, width=10).pack(side="left", padx=5)
+        tk.Button(btn_row, text="Delete", command=remove_item, width=10,
                   bg="#d9534f", fg="white").pack(side="left", padx=5)
         tk.Button(btn_row, text="Export PDF", command=export_pdf, width=10).pack(side="left", padx=5)
         tk.Button(btn_row, text="Close", command=dialog.destroy, width=10).pack(side="left", padx=5)
