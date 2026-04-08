@@ -59,9 +59,14 @@ def init_database():
             CREATE TABLE IF NOT EXISTS to_buy (
                 list_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 item_id INTEGER,
+                quantity_needed INTEGER DEFAULT 1,
                 FOREIGN KEY (item_id) REFERENCES inventory(item_id)
             )
         ''')
+        try:
+            cursor.execute('ALTER TABLE to_buy ADD COLUMN quantity_needed INTEGER DEFAULT 1')
+        except Exception:
+            pass
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS categories (
                 category_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -75,6 +80,12 @@ def init_database():
                 category_id INTEGER,
                 FOREIGN KEY (item_id) REFERENCES inventory(item_id),
                 FOREIGN KEY (category_id) REFERENCES categories(category_id)
+            )
+        ''')
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS vendor_names (
+                vendor_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT UNIQUE NOT NULL
             )
         ''')
 
@@ -138,8 +149,18 @@ def update_item(item_id, item_data):
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('''
-            UPDATE inventory SET quantity = ? WHERE item_id = ?
-        ''', (item_data['quantity'], item_id))
+            UPDATE inventory SET name = ?, quantity = ?, date_added = ?, date_expired = ?,
+            location = ?, category = ?, vendor = ? WHERE item_id = ?
+        ''', (
+            item_data['name'],
+            item_data['quantity'],
+            item_data['date_added'],
+            item_data['date_expired'],
+            item_data['location'],
+            item_data['category'],
+            item_data['vendor'],
+            item_id
+        ))
 
 # A function to retrieve all inventory items from the database, it connects to the database, executes a query to select all items, and returns the results
 def get_all_items():
@@ -196,10 +217,10 @@ def update_vendor(item_id, old_vendor, new_vendor):
 # ---------------------------------------------------------------------------------------------------------------
 
 # A function to add an item to the To-Buy list in the database, it inserts a new record into the to_buy table with the item_id of the item that needs to be purchased
-def add_to_buy(item_id):
+def add_to_buy(item_id, quantity_needed=1):
     with get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO to_buy (item_id) VALUES (?)', (item_id,))
+        cursor.execute('INSERT INTO to_buy (item_id, quantity_needed) VALUES (?, ?)', (item_id, quantity_needed))
 
 # A function to remove an item from the To-Buy list in the database, it deletes the record from the to_buy table that matches the given item_id, effectively removing the item from the user's To-Buy list
 def remove_from_to_buy(item_id):
@@ -212,11 +233,16 @@ def get_to_buy_list():
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT inventory.item_id, inventory.name, inventory.quantity
+            SELECT inventory.item_id, inventory.name, inventory.quantity, to_buy.quantity_needed
             FROM to_buy
             JOIN inventory ON to_buy.item_id = inventory.item_id
         ''')
         return cursor.fetchall()
+
+def update_to_buy_quantity(item_id, quantity_needed):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('UPDATE to_buy SET quantity_needed = ? WHERE item_id = ?', (quantity_needed, item_id))
     
 # A function to export the To-Buy list to a PDF file, it takes a filename as input and calls the database function to retrieve the items in the To-Buy list, then formats that data into a PDF document and saves it with the given filename
 def export_to_pdf(items, filename):
@@ -423,3 +449,35 @@ def filter_by_location(location):
             WHERE location = ?
         ''', (location,))
         return cursor.fetchall()
+
+# ---------------------------------------------------------------------------------------------------------------
+# VENDOR NAME REGISTRY FUNCTIONS
+# ---------------------------------------------------------------------------------------------------------------
+
+def get_vendor_names():
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT name FROM vendor_names
+            UNION
+            SELECT DISTINCT vendor FROM inventory
+            WHERE vendor IS NOT NULL AND vendor != '' AND vendor != 'Unknown'
+            ORDER BY name ASC
+        ''')
+        return cursor.fetchall()
+
+def add_vendor_name(name):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO vendor_names (name) VALUES (?)', (name,))
+
+def delete_vendor_name(name):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM vendor_names WHERE name = ?', (name,))
+
+def rename_vendor_name(old_name, new_name):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('UPDATE vendor_names SET name = ? WHERE name = ?', (new_name, old_name))
+        cursor.execute('UPDATE inventory SET vendor = ? WHERE vendor = ?', (new_name, old_name))

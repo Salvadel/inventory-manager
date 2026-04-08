@@ -112,19 +112,46 @@ def update_vendor_for_item(item_id, old_vendor_name, new_vendor_name):
     security.validate_vendor_name(new_vendor_name)
     return database.update_vendor(item_id, old_vendor_name, new_vendor_name)
 
+# Returns all vendor names from the vendor name registry
+def get_all_vendor_names():
+    return [row[0] for row in database.get_vendor_names()]
+
+# Adds a new vendor name to the registry
+def new_vendor_name(name):
+    security.validate_vendor_name(name)
+    return database.add_vendor_name(name)
+
+# Deletes a vendor name from the registry
+def delete_vendor_name(name):
+    security.validate_vendor_name(name)
+    return database.delete_vendor_name(name)
+
+# Renames a vendor in the registry and updates all inventory items using that vendor
+def rename_vendor_name(old_name, new_name):
+    security.validate_vendor_name(old_name)
+    security.validate_vendor_name(new_name)
+    return database.rename_vendor_name(old_name, new_name)
+
 # ---------------------------------------------------------------------------------------------------------------
 # TO-BUY LIST FUNCTIONS
 # ---------------------------------------------------------------------------------------------------------------
 
 # Validates the item ID then adds it to the to-buy list
-def add_item_to_buy_list(item_id):
+def add_item_to_buy_list(item_id, quantity_needed=1):
     security.validate_item_id(item_id)
-    return database.add_to_buy(item_id)
+    security.validate_quantity(quantity_needed)
+    return database.add_to_buy(item_id, quantity_needed)
 
 # Validates the item ID then removes it from the to-buy list
 def remove_item_from_to_buy_list(item_id):
     security.validate_item_id(item_id)
     return database.remove_from_to_buy(item_id)
+
+# Updates the quantity needed for an item on the to-buy list
+def update_to_buy_quantity(item_id, quantity_needed):
+    security.validate_item_id(item_id)
+    security.validate_quantity(quantity_needed)
+    return database.update_to_buy_quantity(item_id, quantity_needed)
 
 # Returns a list of items currently in the to-buy list, or an empty list if there are none
 def view_to_buy_list():
