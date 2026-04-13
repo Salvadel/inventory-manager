@@ -41,6 +41,13 @@ def change_user_password(username, new_password):
 def add_inventory_item(name, quantity, date_added=None, date_expired=None, location='Unknown', category='General', vendor='Unknown'):
     security.validate_name(name)
     security.validate_quantity(quantity)
+    if date_added is not None:
+        security.validate_date(date_added)
+    if date_expired is not None:
+        security.validate_date(date_expired)
+    security.validate_location(location)
+    security.validate_category_name(category)
+    security.validate_vendor_name(vendor)
     return database.add_item({
         'name': name,
         'quantity': quantity,
@@ -63,6 +70,16 @@ def update_inventory_item(item_id, name=None, quantity=None, date_added=None, da
         security.validate_name(name)
     if quantity is not None:
         security.validate_quantity(quantity)
+    if date_added is not None:
+        security.validate_date(date_added)
+    if date_expired is not None:
+        security.validate_date(date_expired)
+    if location is not None:
+        security.validate_location(location)
+    if category is not None:
+        security.validate_category_name(category)
+    if vendor is not None:
+        security.validate_vendor_name(vendor)
     return database.update_item(item_id, {
         'name': name,
         'quantity': quantity,
@@ -251,16 +268,21 @@ def sort_items_by_id():
 
 # A function to filter items by expiration date, it takes a start date and end date as input, connects to the database, retrieves all items from the inventory table, and filters them to include only those with an expiration date that falls within the specified date range, returning the filtered list of items
 def filter_items_by_expiration(start_date, end_date):
+    security.validate_date(start_date)
+    security.validate_date(end_date)
     return database.filter_by_expiration_date(start_date, end_date)
 
 # A function to filter items by date added, it takes a start date and end date as input, connects to the database, retrieves all items from the inventory table, and filters them to include only those with a date added that falls within the specified date range, returning the filtered list of items
 def filter_items_by_category(category_name):
+    security.validate_category_name(category_name)
     return database.filter_by_category(category_name)
 
 # A function to filter items by vendor, it takes a vendor name as input, connects to the database, retrieves all items from the inventory table, and filters them to include only those with a vendor that matches the specified name, returning the filtered list of items
 def filter_items_by_vendor(vendor_name):
+    security.validate_vendor_name(vendor_name)
     return database.filter_by_vendor(vendor_name)
 
 # A function to filter items by location, it takes a location name as input, connects to the database, retrieves all items from the inventory table, and filters them to include only those with a location that matches the specified name, returning the filtered list of items
 def filter_items_by_location(location):
+    security.validate_location(location)
     return database.filter_by_location(location)
