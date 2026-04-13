@@ -129,6 +129,10 @@ def update_vendor_for_item(item_id, old_vendor_name, new_vendor_name):
     security.validate_vendor_name(new_vendor_name)
     return database.update_vendor(item_id, old_vendor_name, new_vendor_name)
 
+# Returns all distinct locations currently used in inventory
+def get_all_locations():
+    return [row[0] for row in database.get_distinct_locations()]
+
 # Returns all vendor names from the vendor name registry
 def get_all_vendor_names():
     return [row[0] for row in database.get_vendor_names()]

@@ -17,32 +17,48 @@ def show_inventory_screen():
     """Displays inventory management interface."""
     root = tk.Tk()
     root.title("Composite Inventory Manager")
-    root.geometry("1000x600")
 
-    # Search Bar
+    # Row 1: Search + Sort
     top = tk.Frame(root)
-    top.pack(fill="x", padx=10, pady=6)
+    top.pack(fill="x", padx=10, pady=(6, 2))
 
     tk.Label(top, text="Search:").pack(side="left")
     search_var = tk.StringVar()
     search_entry = tk.Entry(top, textvariable=search_var, width=30)
     search_entry.pack(side="left", padx=4)
 
-    tk.Label(top, text="  Sort by:").pack(side="left")
+    tk.Button(top, text="Search", command=lambda: apply_filters()).pack(side="left", padx=2)
+    tk.Button(top, text="Reset",  command=lambda: do_reset()).pack(side="left", padx=2)
+
+    # Row 2: Filters + Sort
+    top2 = tk.Frame(root)
+    top2.pack(fill="x", padx=10, pady=(0, 4))
+
+    tk.Label(top2, text="Sort by:").pack(side="left")
     sort_var = tk.StringVar(value="ID")
-    sort_cb = ttk.Combobox(top, textvariable=sort_var,
+    sort_cb = ttk.Combobox(top2, textvariable=sort_var,
         values=["ID","Name","Qty","Date Added","Expiration","Location","Category","Vendor"],
                 state="readonly", width=12)
     sort_cb.pack(side="left", padx=4)
 
     sort_asc = [True]
-    asc_btn = tk.Button(top, text="↑ Asc", width=6)
+    asc_btn = tk.Button(top2, text="↑ Asc", width=6)
     asc_btn.pack(side="left", padx=2)
 
-    tk.Label(top, text="  Category:").pack(side="left")
+    tk.Label(top2, text="  Category:").pack(side="left")
     filter_var = tk.StringVar(value="All")
-    filter_cb = ttk.Combobox(top, textvariable=filter_var, state="readonly", width=14)
+    filter_cb = ttk.Combobox(top2, textvariable=filter_var, state="readonly", width=14)
     filter_cb.pack(side="left", padx=4)
+
+    tk.Label(top2, text="  Vendor:").pack(side="left")
+    vendor_filter_var = tk.StringVar(value="All")
+    vendor_filter_cb = ttk.Combobox(top2, textvariable=vendor_filter_var, state="readonly", width=14)
+    vendor_filter_cb.pack(side="left", padx=4)
+
+    tk.Label(top2, text="  Location:").pack(side="left")
+    location_filter_var = tk.StringVar(value="All")
+    location_filter_cb = ttk.Combobox(top2, textvariable=location_filter_var, state="readonly", width=14)
+    location_filter_cb.pack(side="left", padx=4)
 
     def refresh_category_dropdown():
         cats = ["All"] + [row[0] for row in database.get_categories()]
@@ -50,7 +66,21 @@ def show_inventory_screen():
         if filter_var.get() not in cats:
             filter_var.set("All")
 
+    def refresh_vendor_dropdown():
+        vendors = ["All"] + inventory.get_all_vendor_names()
+        vendor_filter_cb["values"] = vendors
+        if vendor_filter_var.get() not in vendors:
+            vendor_filter_var.set("All")
+
+    def refresh_location_dropdown():
+        locations = ["All"] + inventory.get_all_locations()
+        location_filter_cb["values"] = locations
+        if location_filter_var.get() not in locations:
+            location_filter_var.set("All")
+
     refresh_category_dropdown()
+    refresh_vendor_dropdown()
+    refresh_location_dropdown()
 
     # Table
     frame = tk.Frame(root)
@@ -77,6 +107,8 @@ def show_inventory_screen():
     def apply_filters(*_):
         query = search_var.get().strip()
         cat = filter_var.get()
+        vendor = vendor_filter_var.get()
+        location = location_filter_var.get()
 
         if query:
             try:
@@ -90,6 +122,10 @@ def show_inventory_screen():
 
         if cat != "All":
             items = [row for row in items if (row[6] or "") == cat]
+        if vendor != "All":
+            items = [row for row in items if (row[7] or "") == vendor]
+        if location != "All":
+            items = [row for row in items if (row[5] or "") == location]
 
         col = sort_var.get()
         idx = COL_IDX.get(col, 0)
@@ -130,6 +166,8 @@ def show_inventory_screen():
     asc_btn.config(command=toggle_sort_direction)
     sort_cb.bind("<<ComboboxSelected>>", apply_filters)
     filter_cb.bind("<<ComboboxSelected>>", apply_filters)
+    vendor_filter_cb.bind("<<ComboboxSelected>>", apply_filters)
+    location_filter_cb.bind("<<ComboboxSelected>>", apply_filters)
 
     for col in COLS:
         tree.heading(col, command=lambda c=col: on_heading_click(c))
@@ -137,16 +175,20 @@ def show_inventory_screen():
     inventory.startup()
     apply_filters()
 
+    # Auto-size window width to fit toolbar contents, keep 600px height
+    root.update_idletasks()
+    root.geometry(f"{max(root.winfo_reqwidth(), 900)}x600")
+
     def do_reset():
         search_var.set("")
         sort_var.set("ID")
         sort_asc[0] = True
         asc_btn.config(text="↑ Asc")
         filter_var.set("All")
+        vendor_filter_var.set("All")
+        location_filter_var.set("All")
         apply_filters()
 
-    tk.Button(top, text="Search", command=apply_filters).pack(side="left", padx=2)
-    tk.Button(top, text="Reset", command=do_reset).pack(side="left", padx=2)
     search_entry.bind("<Return>", apply_filters)
 
     vsb.pack(side="right",  fill="y")
@@ -221,6 +263,8 @@ def show_inventory_screen():
                 inventory.add_inventory_item(name, quantity, date_added, date_expired, location, category, vendor)
                 dialog.destroy()
                 refresh_category_dropdown()
+                refresh_vendor_dropdown()
+                refresh_location_dropdown()
                 apply_filters()
             except Exception as e:
                 messagebox.showerror("Error", str(e), parent=dialog)
@@ -297,6 +341,8 @@ def show_inventory_screen():
                                                 location=location, category=category, vendor=vendor)
                 dialog.destroy()
                 refresh_category_dropdown()
+                refresh_vendor_dropdown()
+                refresh_location_dropdown()
                 apply_filters()
             except Exception as e:
                 messagebox.showerror("Error", str(e), parent=dialog)

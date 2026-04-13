@@ -454,6 +454,16 @@ def filter_by_location(location):
 # VENDOR NAME REGISTRY FUNCTIONS
 # ---------------------------------------------------------------------------------------------------------------
 
+def get_distinct_locations():
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT DISTINCT location FROM inventory
+            WHERE location IS NOT NULL AND location != '' AND location != 'Unknown'
+            ORDER BY location ASC
+        ''')
+        return cursor.fetchall()
+
 def get_vendor_names():
     with get_connection() as conn:
         cursor = conn.cursor()
