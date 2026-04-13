@@ -270,12 +270,6 @@ def sort_items_by_id():
 # FILTER ITEMS FUNCTIONS
 # ---------------------------------------------------------------------------------------------------------------
 
-# A function to filter items by expiration date, it takes a start date and end date as input, connects to the database, retrieves all items from the inventory table, and filters them to include only those with an expiration date that falls within the specified date range, returning the filtered list of items
-def filter_items_by_expiration(start_date, end_date):
-    security.validate_date(start_date)
-    security.validate_date(end_date)
-    return database.filter_by_expiration_date(start_date, end_date)
-
 # A function to filter items by date added, it takes a start date and end date as input, connects to the database, retrieves all items from the inventory table, and filters them to include only those with a date added that falls within the specified date range, returning the filtered list of items
 def filter_items_by_category(category_name):
     security.validate_category_name(category_name)

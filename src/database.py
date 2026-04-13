@@ -410,16 +410,6 @@ def sort_by_id():
 # FILTER ITEMS FUNCTIONS
 # ---------------------------------------------------------------------------------------------------------------
 
-def filter_by_expiration_date(start_date, end_date):
-    with get_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT item_id, name, quantity, date_added, date_expired, location, category, vendor
-            FROM inventory
-            WHERE date_expired BETWEEN ? AND ?
-        ''', (start_date, end_date))
-        return cursor.fetchall()
-    
 def filter_by_category(category_name):
     with get_connection() as conn:
         cursor = conn.cursor()
