@@ -71,3 +71,4 @@ def validate_quantity(quantity):
         raise ValueError("Quantity cannot be negative.")
 
 # For reference security.py should be used wehen adding a new user or passwordto ensure they meet security requirements.
+
