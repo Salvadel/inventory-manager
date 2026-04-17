@@ -51,10 +51,6 @@ def validate_quantity(quantity):
     if quantity < 0:
         raise ValueError("Quantity cannot be negative.")
 
-<<<<<<< HEAD
-# For reference security.py should be used wehen adding a new user or passwordto ensure they meet security requirements.
-
-=======
 # A function to validate item IDs for database operations
 def validate_item_id(item_id):
     if not isinstance(item_id, int) or item_id <= 0:
@@ -93,4 +89,3 @@ def validate_filename(filename):
     # Additional filename validation can be added here if needed
     if re.search(r'[<>:"/\\|?*]', filename):
         raise ValueError("Filename contains invalid characters. Avoid using <>:\"/\\|?*.")
->>>>>>> d79dc38f0c7db150d55eaf5d5ff2f4a475326d64
