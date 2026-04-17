@@ -4,9 +4,10 @@ A simple tool for tracking your inventory that runs directly from a USB flash dr
 
 ## Instructions
 
-1. Plug the flash drive into your Windows computer
-2. Open the flash drive in **File Explorer**
-3. Double-click **`InventoryManager.exe`**
+1. Extract the file onto a flash drive
+2. Plug the flash drive into your Windows computer
+3. Open the flash drive in **File Explorer**
+4. Double-click **`InventoryManager.exe`**
 
 The program will open in a new window.
 
