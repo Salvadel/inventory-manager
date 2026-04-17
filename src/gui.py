@@ -25,7 +25,7 @@ def show_inventory_screen():
             anchor = parent or root
             d = tk.Toplevel(anchor)
             d.title(title)
-            d.resizable(False, False)
+            d.resizable(True, True)
             d.transient(anchor)
             d.grab_set()
             tk.Label(d, text=msg, wraplength=260, justify="left",
@@ -33,12 +33,13 @@ def show_inventory_screen():
             return d, anchor
 
         def _show(self, d, anchor):
+            d.minsize(300, 0)
             d.update_idletasks()
             w = max(d.winfo_reqwidth(), 300)
             h = d.winfo_reqheight()
             x = anchor.winfo_x() + (anchor.winfo_width()  - w) // 2
             y = anchor.winfo_y() + (anchor.winfo_height() - h) // 2
-            d.geometry(f"{w}x{h}+{x}+{y}")
+            d.geometry(f"+{x}+{y}")
             d.wait_window()
 
         def showerror(self, title, msg, parent=None):
@@ -248,16 +249,18 @@ def show_inventory_screen():
     bot = tk.Frame(root)
     bot.pack(fill="x", padx=10, pady=6)
 
-    def center_on_parent(dialog, width, height):
-        root.update_idletasks()
-        x = root.winfo_x() + (root.winfo_width() - width) // 2
-        y = root.winfo_y() + (root.winfo_height() - height) // 2
-        dialog.geometry(f"{width}x{height}+{x}+{y}")
+    def center_on_parent(dialog, width=None, height=None):
+        dialog.update_idletasks()
+        w = max(dialog.winfo_reqwidth(), width or 0)
+        h = max(dialog.winfo_reqheight(), height or 0)
+        x = root.winfo_x() + (root.winfo_width()  - w) // 2
+        y = root.winfo_y() + (root.winfo_height() - h) // 2
+        dialog.geometry(f"+{x}+{y}")
 
     def open_add_item_dialog():
         dialog = tk.Toplevel(root)
         dialog.title("Add Item")
-        dialog.resizable(False, False)
+        dialog.resizable(True, True)
         dialog.grab_set()
         center_on_parent(dialog, 380, 280)
 
@@ -289,7 +292,7 @@ def show_inventory_screen():
             def open_new():
                 add_dialog = tk.Toplevel(dialog)
                 add_dialog.title(f"Add {label}")
-                add_dialog.resizable(False, False)
+                add_dialog.resizable(True, True)
                 add_dialog.grab_set()
                 center_on_parent(add_dialog, 280, 110)
 
@@ -381,7 +384,7 @@ def show_inventory_screen():
 
         dialog = tk.Toplevel(root)
         dialog.title("Edit Item")
-        dialog.resizable(False, False)
+        dialog.resizable(True, True)
         dialog.grab_set()
         center_on_parent(dialog, 350, 280)
 
@@ -460,7 +463,7 @@ def show_inventory_screen():
 
         dialog = tk.Toplevel(root)
         dialog.title("Confirm Delete")
-        dialog.resizable(False, False)
+        dialog.resizable(True, True)
         dialog.grab_set()
         center_on_parent(dialog, 360, 240)
 
@@ -499,7 +502,7 @@ def show_inventory_screen():
         """Generic dialog for managing a named list (categories, vendors, locations)."""
         dialog = tk.Toplevel(root)
         dialog.title(f"Manage {singular}s")
-        dialog.resizable(False, False)
+        dialog.resizable(True, True)
         dialog.grab_set()
         center_on_parent(dialog, 320, 380)
 
@@ -525,7 +528,7 @@ def show_inventory_screen():
         def do_add():
             add_dialog = tk.Toplevel(dialog)
             add_dialog.title(f"Add {singular}")
-            add_dialog.resizable(False, False)
+            add_dialog.resizable(True, True)
             add_dialog.grab_set()
             center_on_parent(add_dialog, 280, 110)
 
@@ -561,7 +564,7 @@ def show_inventory_screen():
 
             edit_dialog = tk.Toplevel(dialog)
             edit_dialog.title(f"Edit {singular}")
-            edit_dialog.resizable(False, False)
+            edit_dialog.resizable(True, True)
             edit_dialog.grab_set()
             center_on_parent(edit_dialog, 280, 110)
 
@@ -668,7 +671,7 @@ def show_inventory_screen():
 
         dialog = tk.Toplevel(root)
         dialog.title("Add to To-Buy List")
-        dialog.resizable(False, False)
+        dialog.resizable(True, True)
         dialog.grab_set()
         center_on_parent(dialog, 300, 120)
 
@@ -697,7 +700,7 @@ def show_inventory_screen():
     def open_view_tobuy_dialog():
         dialog = tk.Toplevel(root)
         dialog.title("To-Buy List")
-        dialog.resizable(False, False)
+        dialog.resizable(True, True)
         dialog.grab_set()
         center_on_parent(dialog, 480, 380)
 
@@ -752,7 +755,7 @@ def show_inventory_screen():
 
             eq_dialog = tk.Toplevel(dialog)
             eq_dialog.title("Edit Quantity")
-            eq_dialog.resizable(False, False)
+            eq_dialog.resizable(True, True)
             eq_dialog.grab_set()
             center_on_parent(eq_dialog, 280, 110)
 
