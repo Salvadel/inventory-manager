@@ -1,5 +1,13 @@
+'''
+demo.py purpose:
+Provides a command-line interface for users to interact with the inventory management system, for demo purposes. Not permanent.
+'''
 import auth
 import inventory
+from getpass import getpass
+
+username = "LabTA"
+password = "COMLab123!"
 
 def clear_line():
     print("_" * 50)
@@ -18,7 +26,7 @@ def login_menu():
         # If choice 1 ask for the users username and password and attempt to log in, if successful go to inventory menu, if not print error message and return to login menu
         if choice == '1':
             username = input('Username: ')
-            password = input('Password: ')
+            password = getpass('Password: ')
             success, message = auth.login_user(username, password)
             print(message)
             if success:
@@ -39,11 +47,15 @@ def inventory_menu():
         print('1. View Inventory')
         print('2. Add Item')
         print('3. Delete Item')
-        print('4. Search Database')
-        print('5. Manage Categories')
-        print('6. Manage Vendors')
-        print('7. To-Buy List')
-        print('8. Logout')
+        print('4. Update Inventory Quantity')
+        print('5. Search Database')
+        print('6. Manage Categories')
+        print('7. Manage Vendors')
+        print('8. To-Buy List')
+        print('9. Logout')
+        print ('10. View Sorted Inventory')
+        print ('11. Filter Inventory') 
+        print ('12. Change Password')
 
         # Take user input for menu selection
         choice = input('Select an option: ')
@@ -53,7 +65,7 @@ def inventory_menu():
             items, message = inventory.view_inventory()
             if items:
                 for item in items:
-                    print(f"ID: {item[0]}, Name: {item[1]}, Quantity: {item[2]}, Added: {item[3]}, Category: {item[6]}, Vendor: {item[7]}")
+                    print(f"ID: {item[0]}, Name: {item[1]}, Quantity: {item[2]}, Date Added: {item[3]}, Expiry: {item[4]}, Location: {item[5]}, Category: {item[6]}, Vendor: {item[7]}")
             else:
                 print(message)
         # If choice 2 add a new inventory item, take in quantity, price, and name as input and validate them before adding to inventory
@@ -61,22 +73,34 @@ def inventory_menu():
             try:
                 name = input('Item Name: ')
                 quantity = int(input('Quantity: '))
-                date_added = input('Date Added (YYYY-MM-DD): ')
-                date_expired = input('Expiry Date (YYYY-MM-DD): ').strip()
-                location = int(input('Location (enter a number): '))
-                category = input('Category: ')
-                vendor = input('Vendor: ')
+                date_added = input('Date Added (YYYY-MM-DD, or press Enter to skip): ').strip() or None
+                date_expired = input('Expiry Date (YYYY-MM-DD, or press Enter to skip): ').strip() or None
+                location = input('Location (text, or press Enter to skip): ').strip() or 'Unknown'
+                category = input('Category (or press Enter to skip): ').strip() or 'General'
+                vendor = input('Vendor (or press Enter to skip): ').strip() or 'Unknown'
                 inventory.add_inventory_item(name, quantity, date_added, date_expired, location, category, vendor)
                 print('Item added successfully.')
             except ValueError as e:
                 print(f"Input Error: {e}")
         # If choice 3 delete an inventory item, take in item id as input deleting from inventory
         elif choice == '3':
-            item_id = int(input('Item ID to delete: '))
-            inventory.remove_inventory_item(item_id)
-            print('Item deleted successfully.')
-        # If choice is 4 search the database for the item id and return the item
+            try:
+                item_id = int(input('Item ID to delete: '))
+                inventory.remove_inventory_item(item_id)
+                print('Item deleted successfully.')
+            except ValueError:
+                print('Invalid ID. Please enter a number.')
+        # If choice 4 update the quantity of an existing inventory item, take in item id and new quantity as input and validate them before updating inventory
         elif choice == '4':
+            try:
+                item_id = int(input('Item ID to update: '))
+                new_quantity = int(input('New Quantity: '))
+                inventory.update_inventory_item(item_id, quantity=new_quantity)
+                print('Item updated successfully.')
+            except ValueError:
+                print('Invalid input. Please enter numbers for ID and quantity.')
+        # If choice is 5 search the database for the item id and return the item
+        elif choice == '5':
             keyword = input('Enter search keyword: ')
             try:
                 results = inventory.search_inventory(keyword)
@@ -87,23 +111,77 @@ def inventory_menu():
                     print('No items found matching that keyword.')
             except ValueError as e:
                 print(f"Input Error: {e}")
-        # If choice 5 open the category management submenu
-        elif choice == '5':
-            category_menu()
- 
-        # If choice 6 open the vendor management submenu
+        # If choice 6 open the category management submenu
         elif choice == '6':
-            vendor_menu()
- 
-        # If choice 7 open the to-buy list submenu
+            category_menu()
+        # If choice 7 open the vendor management submenu
         elif choice == '7':
-            to_buy_menu()
- 
-        # If choice 8 log out and return to login menu
+            vendor_menu()
+        # If choice 8 open the to-buy list submenu
         elif choice == '8':
+            to_buy_menu()
+        # If choice 9 log out and return to login menu
+        elif choice == '9':
             print('Logging out...')
             break
- 
+        elif choice == '10':
+            sort_options = {
+                '1': ('Expiration Date', inventory.sort_items_by_expiration),
+                '2': ('Date Added', inventory.sort_items_by_date_added),
+                '3': ('Name', inventory.sort_items_by_name),
+                '4': ('Quantity', inventory.sort_items_by_quantity),
+                '5': ('Location', inventory.sort_items_by_location),
+                '6': ('Category', inventory.sort_items_by_category),
+                '7': ('Vendor', inventory.sort_items_by_vendor),
+                '8': ('ID', inventory.sort_items_by_id)
+            }
+            print("Sort Inventory By:")
+            for key, (name, _) in sort_options.items():
+                print(f"{key}. {name}")
+            sort_choice = input('Select a sorting option: ')
+            if sort_choice in sort_options:
+                _, sort_function = sort_options[sort_choice]
+                sorted_items = sort_function()
+                for item in sorted_items:
+                    print(f"ID: {item[0]}, Name: {item[1]}, Quantity: {item[2]}, Date Added: {item[3]}, Expiry: {item[4]}, Location: {item[5]}, Category: {item[6]}, Vendor: {item[7]}")
+            else:
+                print('Invalid sorting option. Please try again.')
+        elif choice == '11':
+            print("Filter Inventory By:")
+            print("1. Expiration Date")
+            print("2. Location")
+            print("3. Category")
+            print("4. Vendor")
+            filter_choice = input('Select a filtering option: ')
+            filtered_items = []
+            if filter_choice == '1':
+                start_date = input('Start Date (YYYY-MM-DD): ')
+                end_date = input('End Date (YYYY-MM-DD): ')
+                filtered_items = inventory.filter_items_by_expiration(start_date, end_date)
+            elif filter_choice == '2':
+                location = input('Location: ')
+                filtered_items = inventory.filter_items_by_location(location)
+            elif filter_choice == '3':
+                category_name = input('Category: ')
+                filtered_items = inventory.filter_items_by_category(category_name)
+            elif filter_choice == '4':
+                vendor_name = input('Vendor: ')
+                filtered_items = inventory.filter_items_by_vendor(vendor_name)
+            else:
+                print('Invalid filtering option. Please try again.')
+            if filtered_items:
+                for item in filtered_items:
+                    print(f"ID: {item[0]}, Name: {item[1]}, Quantity: {item[2]}, Date Added: {item[3]}, Expiry: {item[4]}, Location: {item[5]}, Category: {item[6]}, Vendor: {item[7]}")
+            elif filter_choice in ('1', '2', '3', '4'):
+                print('No items found matching that filter.')
+        elif choice == '12':
+            new_password = getpass('Enter new password: ')
+            confirm_password = getpass('Confirm new password: ')
+            if new_password == confirm_password:
+                success, message = inventory.change_user_password(username, new_password)
+                print(message)
+            else:
+                print('Passwords do not match. Please try again.')
         # If the user enters an invalid option print an error message and return to inventory menu
         else:
             print('Invalid option. Please try again.')
@@ -120,9 +198,9 @@ def category_menu():
         print('5. Unassign Item from Category')
         print('6. View Items by Category')
         print('7. Back')
- 
+
         choice = input('Select an option: ')
- 
+
         # View all existing categories
         if choice == '1':
             categories = inventory.get_all_categories()
@@ -131,19 +209,16 @@ def category_menu():
                     print(f"- {category}")
             else:
                 print('No categories found.')
- 
         # Create a new category
         elif choice == '2':
             category_name = input('New Category Name: ')
             inventory.new_category(category_name)
             print(f"Category '{category_name}' created successfully.")
- 
         # Delete an existing category
         elif choice == '3':
             category_name = input('Category Name to Delete: ')
             inventory.delete_category(category_name)
             print(f"Category '{category_name}' deleted successfully.")
- 
         # Assign an item to a category
         elif choice == '4':
             try:
@@ -151,9 +226,8 @@ def category_menu():
                 category_name = input('Category Name: ')
                 inventory.assign_item_to_category(item_id, category_name)
                 print(f"Item {item_id} assigned to '{category_name}' successfully.")
-            except ValueError:
-                print('Invalid ID. Please enter a number.')
- 
+            except ValueError as e:
+                print(f"Error: {e}")
         # Unassign an item from a category
         elif choice == '5':
             try:
@@ -161,9 +235,8 @@ def category_menu():
                 category_name = input('Category Name: ')
                 inventory.unassign_item_from_category(item_id, category_name)
                 print(f"Item {item_id} unassigned from '{category_name}' successfully.")
-            except ValueError:
-                print('Invalid ID. Please enter a number.')
- 
+            except ValueError as e:
+                print(f"Error: {e}")
         # View all items belonging to a category
         elif choice == '6':
             category_name = input('Category Name: ')
@@ -173,14 +246,11 @@ def category_menu():
                     print(f"ID: {item[0]}, Name: {item[1]}, Quantity: {item[2]}")
             else:
                 print(f"No items found in category '{category_name}'.")
- 
         # Return to inventory menu
         elif choice == '7':
             break
- 
         else:
             print('Invalid option. Please try again.')
-            
 
 def vendor_menu():
     while True:
@@ -191,9 +261,9 @@ def vendor_menu():
         print('2. Remove Vendor from Item')
         print('3. Update Vendor for Item')
         print('4. Back')
- 
+
         choice = input('Select an option: ')
- 
+
         # Add a vendor to an item
         if choice == '1':
             try:
@@ -203,7 +273,6 @@ def vendor_menu():
                 print(f"Vendor '{vendor_name}' added to item {item_id} successfully.")
             except ValueError:
                 print('Invalid ID. Please enter a number.')
- 
         # Remove a vendor from an item
         elif choice == '2':
             try:
@@ -213,7 +282,6 @@ def vendor_menu():
                 print(f"Vendor '{vendor_name}' removed from item {item_id} successfully.")
             except ValueError:
                 print('Invalid ID. Please enter a number.')
- 
         # Update a vendor for an item
         elif choice == '3':
             try:
@@ -224,14 +292,11 @@ def vendor_menu():
                 print(f"Vendor updated to '{new_vendor_name}' for item {item_id} successfully.")
             except ValueError:
                 print('Invalid ID. Please enter a number.')
- 
         # Return to inventory menu
         elif choice == '4':
             break
- 
         else:
             print('Invalid option. Please try again.')
-            
 
 def to_buy_menu():
     while True:
@@ -241,10 +306,11 @@ def to_buy_menu():
         print('1. View To-Buy List')
         print('2. Add Item to To-Buy List')
         print('3. Remove Item from To-Buy List')
-        print('4. Back')
- 
+        print('4. Export To-Buy List to PDF')
+        print('5. Back')
+
         choice = input('Select an option: ')
- 
+
         # View all items on the to-buy list
         if choice == '1':
             items = inventory.view_to_buy_list()
@@ -253,7 +319,6 @@ def to_buy_menu():
                     print(f"ID: {item[0]}, Name: {item[1]}, Quantity: {item[2]}")
             else:
                 print('Your to-buy list is empty.')
- 
         # Add an item to the to-buy list
         elif choice == '2':
             try:
@@ -262,7 +327,6 @@ def to_buy_menu():
                 print(f"Item {item_id} added to To-Buy List successfully.")
             except ValueError:
                 print('Invalid ID. Please enter a number.')
- 
         # Remove an item from the to-buy list
         elif choice == '3':
             try:
@@ -271,39 +335,20 @@ def to_buy_menu():
                 print(f"Item {item_id} removed from To-Buy List successfully.")
             except ValueError:
                 print('Invalid ID. Please enter a number.')
- 
-        # Return to inventory menu
+        # Export the to-buy list to PDF
         elif choice == '4':
+            filename = input('Enter filename for PDF (without extension): ')
+            inventory.export_to_buy_list(filename)
+            print(f"To-Buy List exported to '{filename}.pdf' successfully.")
+        # Return to inventory menu
+        elif choice == '5':
             break
- 
         else:
             print('Invalid option. Please try again.')
+
 # Run the application
 if __name__ == "__main__":
-            inventory.startup()
-            login_menu()
-
-
-#complete
-'''
-MALCOLM
-
-All the functiosn you use will be in inventory.py
-
-In this section if you can add the ability to assign items to categories and view items by category that would be great. 
-You can add a new menu option for managing categories in the inventory menu, allowing users to create new categories, 
-assign items to categories, and view items by category. these are in:
-new_category(category_name), delete_category(category_name), get_all_categories(), assign_item_to_category(item_id, category_name), 
-unassign_item_from_category(item_id, category_name), and get_all_items_by_category(category_name) in inventory.py
-
-Also if you could add the search item functionality to the inventory menu that would be great, allowing users to 
-search for items by name and view the results. it is in search_inventory(name) in inventory.py
-
-Also the ability to add and remove vendors from items would be great, allowing users to manage their vendor relationships for each inventory item.
-These are in add_vendor_to_item(item_id, vendor_name), remove_vendor_from_item(item_id, vendor_name), and 
-update_vendor_for_item(item_id, old_vendor_name, new_vendor_name) in inventory.py
-
-And lastly to to buy list funcationalites which are located in add_item_to_buy_list(item_id), remove_item_from_to_buy_list(item_id), and view_to_buy_list() in inventory.py
-
-Let me know if you have any questions, all the functions should be operationsal and completed your ojb is just to gather the user inputs and display everything in the CLI.
-'''
+    inventory.startup()
+    success, message = inventory.create_default_user(username, password)
+    print(message)
+    login_menu()

@@ -1,32 +1,7 @@
-"""
+'''
 auth.py purpose:
-Handles user authentication and login validation.
-
-Key features:
-- Validate user login
-- Secure password comparison
-- Generate secure tokens
-
-
-def login_user(username: str, password: str) -> bool:
-    input: username (str), password (str)
-    output: bool
-    use: Verifies user credentials against stored database record
-    pass
-
-def verify_password(password:str, stored_hash: bytes, stored_salt: bytes):
-    input: password (str), stored_hash (bytes), stored_salt (bytes)
-    output: bool
-    use: Compares provided password with securely stored hash and salt
-    pass
-
-def hash_password(password: str) -> str:
-    input: password (str)
-    output: str
-    use: Returns securely hashed password
-    pass
-"""
-
+Handles user authentication, including password hashing and verification, and user login functionality
+'''
 import hashlib
 import hmac
 import secrets

@@ -1,25 +1,6 @@
 """
 security.py purpose:
-Handles input validation and security checks.
-
-Key features:
-- Validate usernames
-- Validate passwords
-- Enforce security rules
-
-
-def validate_username(username: str) -> bool:
-    input: username (str)
-    output: bool
-    use: Ensures username meets security requirements
-    pass
-
-
-def validate_password(password: str) -> bool:
-    input: password (str)
-    output: bool
-    use: Ensures password meets strength requirements
-    pass
+Handles security-related functions such as password validation and user creation.
 """
 import re
 
@@ -70,5 +51,46 @@ def validate_quantity(quantity):
     if quantity < 0:
         raise ValueError("Quantity cannot be negative.")
 
+<<<<<<< HEAD
 # For reference security.py should be used wehen adding a new user or passwordto ensure they meet security requirements.
 
+=======
+# A function to validate item IDs for database operations
+def validate_item_id(item_id):
+    if not isinstance(item_id, int) or item_id <= 0:
+        raise ValueError("Item ID must be a positive integer.")
+
+# A function to validate category names for database operations
+def validate_category_name(category_name):
+    if not category_name or not category_name.strip():
+        raise ValueError("Category name cannot be empty.")
+
+# A function to validate vendor names for database operations
+def validate_vendor_name(vendor_name):
+    if not vendor_name or not vendor_name.strip():
+        raise ValueError("Vendor name cannot be empty.")
+
+# A function to validate location names for database operations
+def validate_location(location):
+    if not location or not location.strip():
+        raise ValueError("Location cannot be empty.")
+
+# A function to validate dates for database operations
+def validate_date(date_str):
+    if not date_str or not date_str.strip():
+        raise ValueError("Date cannot be empty.")
+    # Additional date format validation can be added here if needed
+    try:
+        from datetime import datetime
+        datetime.strptime(date_str, "%Y-%m-%d")
+    except ValueError:
+        raise ValueError("Invalid date format. Please use YYYY-MM-DD.")
+
+# A function to validate usernames for user creation
+def validate_filename(filename):
+    if not filename or not filename.strip():
+        raise ValueError("Filename cannot be empty.")
+    # Additional filename validation can be added here if needed
+    if re.search(r'[<>:"/\\|?*]', filename):
+        raise ValueError("Filename contains invalid characters. Avoid using <>:\"/\\|?*.")
+>>>>>>> d79dc38f0c7db150d55eaf5d5ff2f4a475326d64
