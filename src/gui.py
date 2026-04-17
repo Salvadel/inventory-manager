@@ -1,9 +1,10 @@
 import tkinter as tk
-from tkinter import ttk, messagebox, simpledialog
+from tkinter import ttk, simpledialog
 from datetime import date
 from auth import login_user
 import inventory
 import database
+
 """
 gui.py purpose:
 Contains all code related to the main menu graphical user interface of the application.
@@ -17,6 +18,57 @@ def show_inventory_screen():
     """Displays inventory management interface."""
     root = tk.Tk()
     root.title("Composite Inventory Manager")
+
+    # Custom messagebox that always centers on the application window
+    class _CenteredMessageBox:
+        def _build(self, title, msg, parent=None):
+            anchor = parent or root
+            d = tk.Toplevel(anchor)
+            d.title(title)
+            d.resizable(False, False)
+            d.transient(anchor)
+            d.grab_set()
+            tk.Label(d, text=msg, wraplength=260, justify="left",
+                     padx=16, pady=12).pack()
+            return d, anchor
+
+        def _show(self, d, anchor):
+            d.update_idletasks()
+            w = max(d.winfo_reqwidth(), 300)
+            h = d.winfo_reqheight()
+            x = anchor.winfo_x() + (anchor.winfo_width()  - w) // 2
+            y = anchor.winfo_y() + (anchor.winfo_height() - h) // 2
+            d.geometry(f"{w}x{h}+{x}+{y}")
+            d.wait_window()
+
+        def showerror(self, title, msg, parent=None):
+            d, anchor = self._build(title, msg, parent)
+            tk.Button(d, text="OK", command=d.destroy, width=8).pack(pady=(0, 10))
+            self._show(d, anchor)
+
+        def showwarning(self, title, msg, parent=None):
+            d, anchor = self._build(title, msg, parent)
+            tk.Button(d, text="OK", command=d.destroy, width=8).pack(pady=(0, 10))
+            self._show(d, anchor)
+
+        def showinfo(self, title, msg, parent=None):
+            d, anchor = self._build(title, msg, parent)
+            tk.Button(d, text="OK", command=d.destroy, width=8).pack(pady=(0, 10))
+            self._show(d, anchor)
+
+        def askyesno(self, title, msg, parent=None):
+            result = [False]
+            d, anchor = self._build(title, msg, parent)
+            btn_f = tk.Frame(d)
+            btn_f.pack(pady=(0, 10))
+            tk.Button(btn_f, text="Yes", width=8,
+                      command=lambda: (result.__setitem__(0, True), d.destroy())).pack(side="left", padx=6)
+            tk.Button(btn_f, text="No", width=8,
+                      command=d.destroy).pack(side="left", padx=6)
+            self._show(d, anchor)
+            return result[0]
+
+    messagebox = _CenteredMessageBox()
 
     # Row 1: Search + Sort
     top = tk.Frame(root)
@@ -175,9 +227,6 @@ def show_inventory_screen():
     inventory.startup()
     apply_filters()
 
-    # Auto-size window width to fit toolbar contents, keep 600px height
-    root.update_idletasks()
-    root.geometry(f"{max(root.winfo_reqwidth(), 900)}x600")
 
     def do_reset():
         search_var.set("")
@@ -210,14 +259,13 @@ def show_inventory_screen():
         dialog.title("Add Item")
         dialog.resizable(False, False)
         dialog.grab_set()
-        center_on_parent(dialog, 350, 280)
+        center_on_parent(dialog, 380, 280)
 
         plain_fields = [
             ("Name *", ""),
             ("Quantity *", ""),
             ("Date Added (YYYY-MM-DD)", date.today().strftime("%Y-%m-%d")),
             ("Expiration (YYYY-MM-DD)", ""),
-            ("Location", "Unknown"),
         ]
 
         entries = {}
@@ -227,26 +275,75 @@ def show_inventory_screen():
             tk.Entry(dialog, textvariable=var, width=25).grid(row=i, column=1, padx=10, pady=4)
             entries[label] = var
 
-        cat_row = len(plain_fields)
-        tk.Label(dialog, text="Category", anchor="w").grid(row=cat_row, column=0, padx=10, pady=4, sticky="w")
-        cat_var = tk.StringVar(value="General")
-        cat_options = ["General"] + inventory.get_all_categories()
-        ttk.Combobox(dialog, textvariable=cat_var, values=cat_options,
-                     state="readonly", width=23).grid(row=cat_row, column=1, padx=10, pady=4)
+        def make_combobox_with_new(parent_row, label, default, get_all_fn, add_fn, refresh_fn):
+            """Creates a combobox + New button row; returns (StringVar, Combobox)."""
+            row_var = tk.StringVar(value=default)
+            tk.Label(dialog, text=label, anchor="w").grid(row=parent_row, column=0, padx=10, pady=4, sticky="w")
+            frame = tk.Frame(dialog)
+            frame.grid(row=parent_row, column=1, padx=10, pady=4, sticky="w")
+            cb = ttk.Combobox(frame, textvariable=row_var,
+                              values=[default] + get_all_fn(),
+                              state="readonly", width=15)
+            cb.pack(side="left")
+
+            def open_new():
+                add_dialog = tk.Toplevel(dialog)
+                add_dialog.title(f"Add {label}")
+                add_dialog.resizable(False, False)
+                add_dialog.grab_set()
+                center_on_parent(add_dialog, 280, 110)
+
+                tk.Label(add_dialog, text=f"{label} Name:").grid(row=0, column=0, padx=10, pady=12, sticky="w")
+                name_var = tk.StringVar()
+                tk.Entry(add_dialog, textvariable=name_var, width=20).grid(row=0, column=1, padx=10, pady=12)
+
+                def submit_new():
+                    name = name_var.get().strip()
+                    if not name:
+                        messagebox.showerror("Error", "Name cannot be empty.", parent=add_dialog)
+                        return
+                    try:
+                        add_fn(name)
+                        add_dialog.destroy()
+                        cb["values"] = [default] + get_all_fn()
+                        row_var.set(name)
+                        refresh_fn()
+                    except Exception as e:
+                        messagebox.showerror("Error", str(e), parent=add_dialog)
+
+                btn_f = tk.Frame(add_dialog)
+                btn_f.grid(row=1, column=0, columnspan=2, pady=4)
+                tk.Button(btn_f, text="Add", command=submit_new, width=8,
+                          bg="#5cb85c", fg="white").pack(side="left", padx=6)
+                tk.Button(btn_f, text="Cancel", command=add_dialog.destroy, width=8).pack(side="left", padx=6)
+
+            tk.Button(frame, text="New", command=open_new, width=5).pack(side="left", padx=(6, 0))
+            return row_var, cb
+
+        loc_row = len(plain_fields)
+        loc_var, _ = make_combobox_with_new(loc_row, "Location", "Unknown",
+                                            inventory.get_all_location_names,
+                                            inventory.new_location,
+                                            refresh_location_dropdown)
+
+        cat_row = loc_row + 1
+        cat_var, _ = make_combobox_with_new(cat_row, "Category", "General",
+                                            inventory.get_all_categories,
+                                            inventory.new_category,
+                                            refresh_category_dropdown)
 
         vendor_row = cat_row + 1
-        tk.Label(dialog, text="Vendor", anchor="w").grid(row=vendor_row, column=0, padx=10, pady=4, sticky="w")
-        vendor_var = tk.StringVar(value="Unknown")
-        vendor_options = ["Unknown"] + inventory.get_all_vendor_names()
-        ttk.Combobox(dialog, textvariable=vendor_var, values=vendor_options,
-                     state="readonly", width=23).grid(row=vendor_row, column=1, padx=10, pady=4)
+        vendor_var, _ = make_combobox_with_new(vendor_row, "Vendor", "Unknown",
+                                               inventory.get_all_vendor_names,
+                                               inventory.new_vendor_name,
+                                               refresh_vendor_dropdown)
 
         def submit():
             name = entries["Name *"].get().strip()
             qty_str = entries["Quantity *"].get().strip()
             date_added = entries["Date Added (YYYY-MM-DD)"].get().strip() or None
             date_expired = entries["Expiration (YYYY-MM-DD)"].get().strip() or None
-            location = entries["Location"].get().strip() or "Unknown"
+            location = loc_var.get() or "Unknown"
             category = cat_var.get() or "General"
             vendor = vendor_var.get() or "Unknown"
 
@@ -270,7 +367,7 @@ def show_inventory_screen():
                 messagebox.showerror("Error", str(e), parent=dialog)
 
         btn_row = vendor_row + 1
-        tk.Button(dialog, text="Add", command=submit, width=10).grid(row=btn_row, column=0, pady=10, padx=10)
+        tk.Button(dialog, text="Add", command=submit, width=10, bg="#5cb85c", fg="white").grid(row=btn_row, column=0, pady=10, padx=10)
         tk.Button(dialog, text="Cancel", command=dialog.destroy, width=10).grid(row=btn_row, column=1, pady=10, padx=10)
 
     def open_edit_item_dialog():
@@ -348,7 +445,7 @@ def show_inventory_screen():
                 messagebox.showerror("Error", str(e), parent=dialog)
 
         btn_row = vendor_row + 1
-        tk.Button(dialog, text="Save", command=submit, width=10).grid(row=btn_row, column=0, pady=10, padx=10)
+        tk.Button(dialog, text="Save", command=submit, width=10, bg="#5cb85c", fg="white").grid(row=btn_row, column=0, pady=10, padx=10)
         tk.Button(dialog, text="Cancel", command=dialog.destroy, width=10).grid(row=btn_row, column=1, pady=10, padx=10)
 
     def open_delete_item_dialog():
@@ -398,40 +495,41 @@ def show_inventory_screen():
                   bg="#d9534f", fg="white").pack(side="left", padx=8)
         tk.Button(btn_frame, text="Cancel", command=dialog.destroy, width=10).pack(side="left", padx=8)
 
-    def open_manage_categories_dialog():
+    def open_manage_list_dialog(singular, get_all_fn, add_fn, rename_fn, delete_fn, delete_msg, refresh_fn=None):
+        """Generic dialog for managing a named list (categories, vendors, locations)."""
         dialog = tk.Toplevel(root)
-        dialog.title("Manage Categories")
+        dialog.title(f"Manage {singular}s")
         dialog.resizable(False, False)
         dialog.grab_set()
         center_on_parent(dialog, 320, 380)
 
-        tk.Label(dialog, text="Categories", font=("", 10, "bold")).pack(pady=(12, 4))
+        tk.Label(dialog, text=f"{singular}s", font=("", 10, "bold")).pack(pady=(12, 4))
 
         list_frame = tk.Frame(dialog)
         list_frame.pack(fill="both", expand=True, padx=16)
 
         scrollbar = ttk.Scrollbar(list_frame, orient="vertical")
-        cat_listbox = tk.Listbox(list_frame, yscrollcommand=scrollbar.set,
-                                 selectmode="single", height=12, width=30)
-        scrollbar.config(command=cat_listbox.yview)
+        listbox = tk.Listbox(list_frame, yscrollcommand=scrollbar.set,
+                             selectmode="single", height=12, width=30)
+        scrollbar.config(command=listbox.yview)
         scrollbar.pack(side="right", fill="y")
-        cat_listbox.pack(side="left", fill="both", expand=True)
+        listbox.pack(side="left", fill="both", expand=True)
 
         def refresh_list():
-            cat_listbox.delete(0, "end")
-            for cat in inventory.get_all_categories():
-                cat_listbox.insert("end", cat)
+            listbox.delete(0, "end")
+            for item in get_all_fn():
+                listbox.insert("end", item)
 
         refresh_list()
 
-        def add_category():
+        def do_add():
             add_dialog = tk.Toplevel(dialog)
-            add_dialog.title("Add Category")
+            add_dialog.title(f"Add {singular}")
             add_dialog.resizable(False, False)
             add_dialog.grab_set()
             center_on_parent(add_dialog, 280, 110)
 
-            tk.Label(add_dialog, text="Category Name:").grid(row=0, column=0, padx=10, pady=12, sticky="w")
+            tk.Label(add_dialog, text=f"{singular} Name:").grid(row=0, column=0, padx=10, pady=12, sticky="w")
             name_var = tk.StringVar()
             tk.Entry(add_dialog, textvariable=name_var, width=20).grid(row=0, column=1, padx=10, pady=12)
 
@@ -441,10 +539,11 @@ def show_inventory_screen():
                     messagebox.showerror("Error", "Name cannot be empty.", parent=add_dialog)
                     return
                 try:
-                    inventory.new_category(name)
+                    add_fn(name)
                     add_dialog.destroy()
                     refresh_list()
-                    refresh_category_dropdown()
+                    if refresh_fn:
+                        refresh_fn()
                 except Exception as e:
                     messagebox.showerror("Error", str(e), parent=add_dialog)
 
@@ -453,15 +552,15 @@ def show_inventory_screen():
             tk.Button(btn_frame, text="Add", command=submit, width=8).pack(side="left", padx=6)
             tk.Button(btn_frame, text="Cancel", command=add_dialog.destroy, width=8).pack(side="left", padx=6)
 
-        def edit_category():
-            sel = cat_listbox.curselection()
+        def do_edit():
+            sel = listbox.curselection()
             if not sel:
-                messagebox.showwarning("No Selection", "Please select a category to edit.", parent=dialog)
+                messagebox.showwarning("No Selection", f"Please select a {singular.lower()} to edit.", parent=dialog)
                 return
-            old_name = cat_listbox.get(sel[0])
+            old_name = listbox.get(sel[0])
 
             edit_dialog = tk.Toplevel(dialog)
-            edit_dialog.title("Edit Category")
+            edit_dialog.title(f"Edit {singular}")
             edit_dialog.resizable(False, False)
             edit_dialog.grab_set()
             center_on_parent(edit_dialog, 280, 110)
@@ -476,15 +575,11 @@ def show_inventory_screen():
                     messagebox.showerror("Error", "Name cannot be empty.", parent=edit_dialog)
                     return
                 try:
-                    # Rename: delete old, create new, update all items that had old category
-                    inventory.delete_category(old_name)
-                    inventory.new_category(new_name)
-                    with database.get_connection() as conn:
-                        conn.cursor().execute(
-                            "UPDATE inventory SET category = ? WHERE category = ?", (new_name, old_name))
+                    rename_fn(old_name, new_name)
                     edit_dialog.destroy()
                     refresh_list()
-                    refresh_category_dropdown()
+                    if refresh_fn:
+                        refresh_fn()
                     apply_filters()
                 except Exception as e:
                     messagebox.showerror("Error", str(e), parent=edit_dialog)
@@ -494,151 +589,72 @@ def show_inventory_screen():
             tk.Button(btn_frame, text="Save", command=submit, width=8).pack(side="left", padx=6)
             tk.Button(btn_frame, text="Cancel", command=edit_dialog.destroy, width=8).pack(side="left", padx=6)
 
-        def delete_category():
-            sel = cat_listbox.curselection()
+        def do_delete():
+            sel = listbox.curselection()
             if not sel:
-                messagebox.showwarning("No Selection", "Please select a category to delete.", parent=dialog)
+                messagebox.showwarning("No Selection", f"Please select a {singular.lower()} to delete.", parent=dialog)
                 return
-            name = cat_listbox.get(sel[0])
-            if not messagebox.askyesno("Confirm Delete",
-                                       f"Delete category '{name}'?\n\nItems in this category will be set to 'General'.",
-                                       parent=dialog):
+            name = listbox.get(sel[0])
+            if not messagebox.askyesno("Confirm Delete", delete_msg(name), parent=dialog):
                 return
             try:
-                inventory.delete_category(name)
-                with database.get_connection() as conn:
-                    conn.cursor().execute(
-                        "UPDATE inventory SET category = 'General' WHERE category = ?", (name,))
+                delete_fn(name)
                 refresh_list()
-                refresh_category_dropdown()
+                if refresh_fn:
+                    refresh_fn()
                 apply_filters()
             except Exception as e:
                 messagebox.showerror("Error", str(e), parent=dialog)
 
         btn_row = tk.Frame(dialog)
         btn_row.pack(pady=10)
-        tk.Button(btn_row, text="Add", command=add_category, width=9).pack(side="left", padx=5)
-        tk.Button(btn_row, text="Edit", command=edit_category, width=9).pack(side="left", padx=5)
-        tk.Button(btn_row, text="Delete", command=delete_category, width=9,
+        tk.Button(btn_row, text="Add",    command=do_add,    width=9, bg="#5cb85c", fg="white").pack(side="left", padx=5)
+        tk.Button(btn_row, text="Edit",   command=do_edit,   width=9, bg="#337ab7", fg="white").pack(side="left", padx=5)
+        tk.Button(btn_row, text="Delete", command=do_delete, width=9,
                   bg="#d9534f", fg="white").pack(side="left", padx=5)
-        tk.Button(btn_row, text="Close", command=dialog.destroy, width=9).pack(side="left", padx=5)
+        tk.Button(btn_row, text="Close",  command=dialog.destroy, width=9).pack(side="left", padx=5)
+
+    def _delete_with_reset(del_fn, col, fallback):
+        """Returns a delete callable that removes the registry entry and resets items."""
+        def fn(name):
+            del_fn(name)
+            with database.get_connection() as conn:
+                conn.cursor().execute(
+                    f"UPDATE inventory SET {col} = ? WHERE {col} = ?", (fallback, name))
+        return fn
+
+    def open_manage_categories_dialog():
+        open_manage_list_dialog(
+            "Category",
+            inventory.get_all_categories,
+            inventory.new_category,
+            inventory.rename_category,
+            _delete_with_reset(inventory.delete_category, "category", "General"),
+            lambda name: f"Delete category '{name}'?\n\nItems in this category will be set to 'General'.",
+            refresh_fn=refresh_category_dropdown,
+        )
+
+    def open_manage_locations_dialog():
+        open_manage_list_dialog(
+            "Location",
+            inventory.get_all_location_names,
+            inventory.new_location,
+            inventory.rename_location,
+            _delete_with_reset(inventory.delete_location, "location", "Unknown"),
+            lambda name: f"Delete location '{name}'?\n\nItems in this location will be set to 'Unknown'.",
+            refresh_fn=refresh_location_dropdown,
+        )
 
     def open_manage_vendors_dialog():
-        dialog = tk.Toplevel(root)
-        dialog.title("Manage Vendors")
-        dialog.resizable(False, False)
-        dialog.grab_set()
-        center_on_parent(dialog, 320, 380)
-
-        tk.Label(dialog, text="Vendors", font=("", 10, "bold")).pack(pady=(12, 4))
-
-        list_frame = tk.Frame(dialog)
-        list_frame.pack(fill="both", expand=True, padx=16)
-
-        scrollbar = ttk.Scrollbar(list_frame, orient="vertical")
-        vendor_listbox = tk.Listbox(list_frame, yscrollcommand=scrollbar.set,
-                                    selectmode="single", height=12, width=30)
-        scrollbar.config(command=vendor_listbox.yview)
-        scrollbar.pack(side="right", fill="y")
-        vendor_listbox.pack(side="left", fill="both", expand=True)
-
-        def refresh_list():
-            vendor_listbox.delete(0, "end")
-            for v in inventory.get_all_vendor_names():
-                vendor_listbox.insert("end", v)
-
-        refresh_list()
-
-        def add_vendor():
-            add_dialog = tk.Toplevel(dialog)
-            add_dialog.title("Add Vendor")
-            add_dialog.resizable(False, False)
-            add_dialog.grab_set()
-            center_on_parent(add_dialog, 280, 110)
-
-            tk.Label(add_dialog, text="Vendor Name:").grid(row=0, column=0, padx=10, pady=12, sticky="w")
-            name_var = tk.StringVar()
-            tk.Entry(add_dialog, textvariable=name_var, width=20).grid(row=0, column=1, padx=10, pady=12)
-
-            def submit():
-                name = name_var.get().strip()
-                if not name:
-                    messagebox.showerror("Error", "Name cannot be empty.", parent=add_dialog)
-                    return
-                try:
-                    inventory.new_vendor_name(name)
-                    add_dialog.destroy()
-                    refresh_list()
-                except Exception as e:
-                    messagebox.showerror("Error", str(e), parent=add_dialog)
-
-            btn_frame = tk.Frame(add_dialog)
-            btn_frame.grid(row=1, column=0, columnspan=2, pady=4)
-            tk.Button(btn_frame, text="Add", command=submit, width=8).pack(side="left", padx=6)
-            tk.Button(btn_frame, text="Cancel", command=add_dialog.destroy, width=8).pack(side="left", padx=6)
-
-        def edit_vendor():
-            sel = vendor_listbox.curselection()
-            if not sel:
-                messagebox.showwarning("No Selection", "Please select a vendor to edit.", parent=dialog)
-                return
-            old_name = vendor_listbox.get(sel[0])
-
-            edit_dialog = tk.Toplevel(dialog)
-            edit_dialog.title("Edit Vendor")
-            edit_dialog.resizable(False, False)
-            edit_dialog.grab_set()
-            center_on_parent(edit_dialog, 280, 110)
-
-            tk.Label(edit_dialog, text="New Name:").grid(row=0, column=0, padx=10, pady=12, sticky="w")
-            name_var = tk.StringVar(value=old_name)
-            tk.Entry(edit_dialog, textvariable=name_var, width=20).grid(row=0, column=1, padx=10, pady=12)
-
-            def submit():
-                new_name = name_var.get().strip()
-                if not new_name:
-                    messagebox.showerror("Error", "Name cannot be empty.", parent=edit_dialog)
-                    return
-                try:
-                    inventory.rename_vendor_name(old_name, new_name)
-                    edit_dialog.destroy()
-                    refresh_list()
-                    apply_filters()
-                except Exception as e:
-                    messagebox.showerror("Error", str(e), parent=edit_dialog)
-
-            btn_frame = tk.Frame(edit_dialog)
-            btn_frame.grid(row=1, column=0, columnspan=2, pady=4)
-            tk.Button(btn_frame, text="Save", command=submit, width=8).pack(side="left", padx=6)
-            tk.Button(btn_frame, text="Cancel", command=edit_dialog.destroy, width=8).pack(side="left", padx=6)
-
-        def delete_vendor():
-            sel = vendor_listbox.curselection()
-            if not sel:
-                messagebox.showwarning("No Selection", "Please select a vendor to delete.", parent=dialog)
-                return
-            name = vendor_listbox.get(sel[0])
-            if not messagebox.askyesno("Confirm Delete",
-                                       f"Delete vendor '{name}'?\n\nItems with this vendor will be set to 'Unknown'.",
-                                       parent=dialog):
-                return
-            try:
-                inventory.delete_vendor_name(name)
-                with database.get_connection() as conn:
-                    conn.cursor().execute(
-                        "UPDATE inventory SET vendor = 'Unknown' WHERE vendor = ?", (name,))
-                refresh_list()
-                apply_filters()
-            except Exception as e:
-                messagebox.showerror("Error", str(e), parent=dialog)
-
-        btn_row = tk.Frame(dialog)
-        btn_row.pack(pady=10)
-        tk.Button(btn_row, text="Add", command=add_vendor, width=9).pack(side="left", padx=5)
-        tk.Button(btn_row, text="Edit", command=edit_vendor, width=9).pack(side="left", padx=5)
-        tk.Button(btn_row, text="Delete", command=delete_vendor, width=9,
-                  bg="#d9534f", fg="white").pack(side="left", padx=5)
-        tk.Button(btn_row, text="Close", command=dialog.destroy, width=9).pack(side="left", padx=5)
+        open_manage_list_dialog(
+            "Vendor",
+            inventory.get_all_vendor_names,
+            inventory.new_vendor_name,
+            inventory.rename_vendor_name,
+            _delete_with_reset(inventory.delete_vendor_name, "vendor", "Unknown"),
+            lambda name: f"Delete vendor '{name}'?\n\nItems with this vendor will be set to 'Unknown'.",
+            refresh_fn=refresh_vendor_dropdown,
+        )
 
     def add_to_tobuy_list():
         selected = tree.selection()
@@ -789,14 +805,20 @@ def show_inventory_screen():
         "Delete Item": open_delete_item_dialog,
         "Manage Categories": open_manage_categories_dialog,
         "Manage Vendors": open_manage_vendors_dialog,
+        "Manage Locations": open_manage_locations_dialog,
         "View To-Buy List": open_view_tobuy_dialog,
         "Add to To-Buy List": add_to_tobuy_list,
         "Logout": root.destroy,
     }
 
     for label in ["Add Item", "Edit Item", "Delete Item",
-                "Manage Categories", "Manage Vendors", "View To-Buy List", "Add to To-Buy List", "Logout"]:
+                "Manage Categories", "Manage Vendors", "Manage Locations",
+                "View To-Buy List", "Add to To-Buy List", "Logout"]:
         tk.Button(bot, text=label, width=14, command=button_commands.get(label)).pack(side="left", padx=3)
+
+    # Size window after all widgets are packed so winfo_reqwidth is accurate
+    root.update_idletasks()
+    root.geometry(f"{max(root.winfo_reqwidth(), 900)}x600")
 
     root.mainloop()
 

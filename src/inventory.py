@@ -2,6 +2,7 @@
 inventory.py purpose:
 Handles inventory management functions and validates data, acting as a seperating layer between the database and the user interface.
 """
+import sqlite3
 import database
 import security
 
@@ -143,7 +144,10 @@ def get_all_vendor_names():
 # Adds a new vendor name to the registry
 def new_vendor_name(name):
     security.validate_vendor_name(name)
-    return database.add_vendor_name(name)
+    try:
+        return database.add_vendor_name(name)
+    except sqlite3.IntegrityError:
+        raise ValueError(f"Vendor '{name}' already exists.")
 
 # Deletes a vendor name from the registry
 def delete_vendor_name(name):
@@ -155,6 +159,29 @@ def rename_vendor_name(old_name, new_name):
     security.validate_vendor_name(old_name)
     security.validate_vendor_name(new_name)
     return database.rename_vendor_name(old_name, new_name)
+
+# Returns all location names from the location name registry
+def get_all_location_names():
+    return [row[0] for row in database.get_location_names()]
+
+# Adds a new location name to the registry
+def new_location(name):
+    security.validate_location(name)
+    try:
+        return database.add_location_name(name)
+    except sqlite3.IntegrityError:
+        raise ValueError(f"Location '{name}' already exists.")
+
+# Deletes a location name from the registry
+def delete_location(name):
+    security.validate_location(name)
+    return database.delete_location_name(name)
+
+# Renames a location in the registry and updates all inventory items using that location
+def rename_location(old_name, new_name):
+    security.validate_location(old_name)
+    security.validate_location(new_name)
+    return database.rename_location_name(old_name, new_name)
 
 # ---------------------------------------------------------------------------------------------------------------
 # TO-BUY LIST FUNCTIONS
@@ -200,12 +227,21 @@ def get_all_categories():
 # Validates and creates a new category
 def new_category(category_name):
     security.validate_category_name(category_name)
-    return database.add_category(category_name)
+    try:
+        return database.add_category(category_name)
+    except sqlite3.IntegrityError:
+        raise ValueError(f"Category '{category_name}' already exists.")
 
 # Validates and deletes a category by name
 def delete_category(category_name):
     security.validate_category_name(category_name)
     return database.delete_category(category_name)
+
+# Renames a category in the registry and updates all inventory items using that category
+def rename_category(old_name, new_name):
+    security.validate_category_name(old_name)
+    security.validate_category_name(new_name)
+    return database.rename_category(old_name, new_name)
 
 # Resolves category name to an ID then assigns the item to that category
 def assign_item_to_category(item_id, category_name):

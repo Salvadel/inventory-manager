@@ -88,6 +88,12 @@ def init_database():
                 name TEXT UNIQUE NOT NULL
             )
         ''')
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS location_names (
+                location_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT UNIQUE NOT NULL
+            )
+        ''')
 
 # ---------------------------------------------------------------------------------------------------------------
 # USER FUNCTIONS
@@ -271,6 +277,12 @@ def delete_category(category_name):
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('DELETE FROM categories WHERE name = ?', (category_name,))
+
+def rename_category(old_name, new_name):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('UPDATE categories SET name = ? WHERE name = ?', (new_name, old_name))
+        cursor.execute('UPDATE inventory SET category = ? WHERE category = ?', (new_name, old_name))
 
 # A function to retrieve all categories from the database
 def get_categories():
@@ -481,3 +493,31 @@ def rename_vendor_name(old_name, new_name):
         cursor = conn.cursor()
         cursor.execute('UPDATE vendor_names SET name = ? WHERE name = ?', (new_name, old_name))
         cursor.execute('UPDATE inventory SET vendor = ? WHERE vendor = ?', (new_name, old_name))
+
+def get_location_names():
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT name FROM location_names
+            UNION
+            SELECT DISTINCT location FROM inventory
+            WHERE location IS NOT NULL AND location != '' AND location != 'Unknown'
+            ORDER BY name ASC
+        ''')
+        return cursor.fetchall()
+
+def add_location_name(name):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO location_names (name) VALUES (?)', (name,))
+
+def delete_location_name(name):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM location_names WHERE name = ?', (name,))
+
+def rename_location_name(old_name, new_name):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('UPDATE location_names SET name = ? WHERE name = ?', (new_name, old_name))
+        cursor.execute('UPDATE inventory SET location = ? WHERE location = ?', (new_name, old_name))
