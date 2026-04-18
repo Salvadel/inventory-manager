@@ -62,7 +62,7 @@ If successful, a confirmation message will appear, and you can log in with your 
 ## Backing Up Your Data
 To keep a backup of your inventory:
 1. Plug in the flash drive
-2. Copy the **entire flash drive folder** to your computer or another safe location
+2. Copy the **entire flash drive data folder** to your computer or another safe location
 
 ## Something Not Working?
 
