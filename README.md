@@ -65,19 +65,19 @@ To keep a backup of your inventory:
 
 ## Something Not Working?
 
-**The `.exe` won't open**
+- **The `.exe` won't open**
 Right-click `InventoryManager.exe` and select **"Run as Administrator"**, then try again.
 
-**A Windows security warning appeared**
+- **A Windows security warning appeared**
 Click **"More info"** then **"Run anyway"** — this is normal for programs not downloaded from an app store.
 
-**The program opens, but my data is missing**
+- **The program opens, but my data is missing**
 Make sure you're opening the `.exe` from the flash drive, not a copy saved elsewhere.
 
-**My backup code is not being accepted when resetting my password**
+- **My backup code is not being accepted when resetting my password**
 Double-check that you are entering the backup code exactly as you set it — it is case-sensitive. If you are certain the code is correct and it still fails, see the reset step below.
 
-**I failed to set a backup code on the first login and cannot get past the prompt**
+- **I failed to set a backup code on the first login and cannot get past the prompt**
 If you entered an invalid code and the setup failed, the program cannot proceed until a valid backup code is saved. To reset and start fresh:
 1. Close the program
 2. Navigate to **`docs/data/`** on the flash drive
