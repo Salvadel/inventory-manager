@@ -28,7 +28,7 @@ Upon logging in, the system will automatically prompt you to create a **backup c
    - At least one lowercase letter
    - At least one number
    - At least one special character (e.g. `!@#$%`)
-4. Click **OK** — you will be taken to the main inventory screen
+4. Click **OK** - you will be taken to the main inventory screen
 
 > **Important:** Write your backup code down and store it somewhere safe. There is no way to recover it if lost. The only reset option is to delete the database (see Troubleshooting).
 
@@ -69,19 +69,19 @@ To keep a backup of your inventory:
 Right-click `InventoryManager.exe` and select **"Run as Administrator"**, then try again.
 
 - **A Windows security warning appeared**
-Click **"More info"** then **"Run anyway"** — this is normal for programs not downloaded from an app store.
+Click **"More info"** then **"Run anyway"** - this is normal for programs not downloaded from an app store.
 
 - **The program opens, but my data is missing**
 Make sure you're opening the `.exe` from the flash drive, not a copy saved elsewhere.
 
 - **My backup code is not being accepted when resetting my password**
-Double-check that you are entering the backup code exactly as you set it — it is case-sensitive. If you are certain the code is correct and it still fails, see the reset step below.
+Double-check that you are entering the backup code exactly as you set it - it is case-sensitive. If you are certain the code is correct and it still fails, see the reset step below.
 
 - **I failed to set a backup code on the first login and cannot get past the prompt**
 If you entered an invalid code and the setup failed, the program cannot proceed until a valid backup code is saved. To reset and start fresh:
 1. Close the program
 2. Navigate to **`docs/data/`** on the flash drive
 3. Delete the file **`inventory.db`**
-4. Relaunch **`InventoryManager.exe`** — the database will be recreated automatically and you can log in and set your backup code again
+4. Relaunch **`InventoryManager.exe`** - the database will be recreated automatically and you can log in and set your backup code again
 
 > **Note:** Deleting `inventory.db` will erase all saved inventory data. Only do this if you have no data worth keeping or have a backup copy saved elsewhere.
