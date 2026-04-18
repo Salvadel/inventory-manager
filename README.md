@@ -10,7 +10,7 @@ A simple tool for tracking your inventory that runs directly from a USB flash dr
 
 The program will open in a new window.
 
-![Inventory Manager Login](docs/screenshots/login.png)
+![Inventory Manager Login](https://i.imgur.com/c4zHGYO.png)
 
 ## First-Time Setup
 Use the following default credentials to log in for the first time:
@@ -20,7 +20,7 @@ Use the following default credentials to log in for the first time:
 | **Username** | `Admin` |
 | **Password** | `ChangeMe123!` |
 
-Upon logging in, the system will automatically prompt you to create a **backup code** before accessing the program. This code is used to reset your password if you ever forget it.
+Upon logging in, the system will automatically prompt you to create a **backup code** before you can access the program. This code is used to reset your password if you ever forget it.
 
 **Creating your backup code:**
 1. Log in with the default credentials above
@@ -33,7 +33,7 @@ Upon logging in, the system will automatically prompt you to create a **backup c
    - At least one special character (e.g. `!@#$%`)
 4. Click **OK** - you will be taken to the main inventory screen
 
-> **Important:** Write your backup code down and store it somewhere safe. There is no way to recover it if lost. The only reset option is to delete the database (see Troubleshooting).
+> **Important:** Write your backup code down and store it somewhere safe. There is no way to recover it if it is lost. The only reset option is to delete the database (see Troubleshooting).
 
 ## Using the Program
 | Feature | What it does |
@@ -49,7 +49,7 @@ Upon logging in, the system will automatically prompt you to create a **backup c
 
 > Your data is saved directly to the flash drive. Nothing is stored online.
 
-![Inventory Manager Home Screen](docs/screenshots/login.png)
+![Inventory Manager Home Screen](https://i.imgur.com/5zyoxW6.png)
 
 ## Changing Your Password
 If you need to change your password after logging in, use the **Forgot password?** link on the login screen.
