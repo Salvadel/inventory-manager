@@ -73,7 +73,7 @@ Right-click `InventoryManager.exe` and select **"Run as Administrator"**, then t
 Click **"More info"** then **"Run anyway"** - this is normal for programs not downloaded from an app store.
 
 - **The program opens, but my data is missing**
-Make sure you're opening the `.exe` from the flash drive, not a copy saved elsewhere.
+Make sure the data folder is placed alongside the location of **`InventoryManager.exe`**.
 
 - **My backup code is not being accepted when resetting my password**
 Double-check that you are entering the backup code exactly as you set it - it is case-sensitive. If you are certain the code is correct and it still fails, see the reset step below.
