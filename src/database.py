@@ -6,8 +6,15 @@ import sqlite3 # For SQLite database operations
 from pathlib import Path # For handling file paths
 from contextlib import contextmanager # For managing database connections
 from fpdf import FPDF # For PDF export functionality
+import sys # for file pathing
 
-DB_NAME = Path(__file__).parent.parent / 'docs' / 'data' / 'inventory.db'
+# Make sure the database file is created in the correct location whether running from source or as a bundled executable
+if getattr(sys, 'frozen', False):
+    BASE_DIR = Path(sys.executable).parent
+else:
+    BASE_DIR = Path(__file__).parent.parent
+
+DB_NAME = BASE_DIR / 'data' / 'inventory.db'
 
 # Opens a connection, commits on success, rolls back on error, and always closes
 @contextmanager
