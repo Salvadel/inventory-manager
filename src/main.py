@@ -5,15 +5,17 @@ from app import run_app
 main.py purpose:
 Entry point of the application.
 """
-
+# This file initializes the database and starts the application.
 def main() -> None:
-    # 1. Initialize the database and ensure the default user exists
-    # This ensures that even on a fresh install, 'LabTA' can log in immediately.
+
     inventory.startup()
-    inventory.create_default_user("LabTA", "COMLab123!")
+    inventory.create_default_user("Admin", "ChangeMe123!")
     
-    # 2. Hand off control to the app engine
+    # Run the application (GUI)
     run_app()
 
+# Run Main
 if __name__ == "__main__":
     main()
+
+# Backup code is Backup123!

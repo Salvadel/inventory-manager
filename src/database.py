@@ -32,7 +32,9 @@ def init_database():
                 user_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL,
-                salt TEXT NOT NULL
+                salt TEXT NOT NULL,
+                backup_hash TEXT,
+                backup_salt TEXT
             )
         ''')
         cursor.execute('''
@@ -63,10 +65,6 @@ def init_database():
                 FOREIGN KEY (item_id) REFERENCES inventory(item_id)
             )
         ''')
-        try:
-            cursor.execute('ALTER TABLE to_buy ADD COLUMN quantity_needed INTEGER DEFAULT 1')
-        except Exception:
-            pass
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS categories (
                 category_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -104,7 +102,7 @@ def get_user(username):
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT user_id, username, password, salt FROM users WHERE username = ?
+            SELECT user_id, username, password, salt, backup_hash, backup_salt FROM users WHERE username = ?
         ''', (username,))
         return cursor.fetchone()
 
@@ -521,3 +519,14 @@ def rename_location_name(old_name, new_name):
         cursor = conn.cursor()
         cursor.execute('UPDATE location_names SET name = ? WHERE name = ?', (new_name, old_name))
         cursor.execute('UPDATE inventory SET location = ? WHERE location = ?', (new_name, old_name))
+
+# ---------------------------------------------------------------------------------------------------------------
+# PASSWORD RESET FUNCTION
+# ---------------------------------------------------------------------------------------------------------------
+# A function to set a backup code for a user, it takes the username, hashed backup code, and salt as input, connects to the database, and updates the corresponding record in the users table with the new backup code and salt provided by the user
+def set_user_backup_code(username, hashed_code, salt):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE users SET backup_hash = ?, backup_salt = ? WHERE username = ?
+        ''', (hashed_code.hex(), salt.hex(), username))

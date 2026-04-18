@@ -13,7 +13,7 @@ Contains all code related to the main menu graphical user interface of the appli
 COLS   = ("ID", "Name", "Qty", "Date Added", "Expiration", "Location", "Category", "Vendor")
 WIDTHS = (40, 160, 50, 100, 100, 100, 100, 110)
 
-
+# Displays inventory management interface.
 def show_inventory_screen():
     """Displays inventory management interface."""
     root = tk.Tk()
@@ -29,7 +29,7 @@ def show_inventory_screen():
             d.transient(anchor)
             d.grab_set()
             tk.Label(d, text=msg, wraplength=260, justify="left",
-                     padx=16, pady=12).pack()
+                    padx=16, pady=12).pack()
             return d, anchor
 
         def _show(self, d, anchor):
@@ -63,9 +63,9 @@ def show_inventory_screen():
             btn_f = tk.Frame(d)
             btn_f.pack(pady=(0, 10))
             tk.Button(btn_f, text="Yes", width=8,
-                      command=lambda: (result.__setitem__(0, True), d.destroy())).pack(side="left", padx=6)
+                    command=lambda: (result.__setitem__(0, True), d.destroy())).pack(side="left", padx=6)
             tk.Button(btn_f, text="No", width=8,
-                      command=d.destroy).pack(side="left", padx=6)
+                    command=d.destroy).pack(side="left", padx=6)
             self._show(d, anchor)
             return result[0]
 
@@ -468,7 +468,7 @@ def show_inventory_screen():
         center_on_parent(dialog, 360, 240)
 
         tk.Label(dialog, text="Are you sure you want to delete this item?",
-                 font=("", 10, "bold")).pack(pady=(16, 8), padx=16)
+                font=("", 10, "bold")).pack(pady=(16, 8), padx=16)
 
         info = (
             f"ID:         {item_id}\n"
@@ -481,8 +481,8 @@ def show_inventory_screen():
             f"Vendor:     {vendor}"
         )
         tk.Label(dialog, text=info, justify="left", anchor="w",
-                 bg="#f0f0f0", relief="groove", padx=8, pady=6,
-                 font=("Courier", 9)).pack(fill="x", padx=16)
+                bg="#f0f0f0", relief="groove", padx=8, pady=6,
+                font=("Courier", 9)).pack(fill="x", padx=16)
 
         def confirm():
             try:
@@ -495,7 +495,7 @@ def show_inventory_screen():
         btn_frame = tk.Frame(dialog)
         btn_frame.pack(pady=12)
         tk.Button(btn_frame, text="Delete", command=confirm, width=10,
-                  bg="#d9534f", fg="white").pack(side="left", padx=8)
+                bg="#d9534f", fg="white").pack(side="left", padx=8)
         tk.Button(btn_frame, text="Cancel", command=dialog.destroy, width=10).pack(side="left", padx=8)
 
     def open_manage_list_dialog(singular, get_all_fn, add_fn, rename_fn, delete_fn, delete_msg, refresh_fn=None):
@@ -513,7 +513,7 @@ def show_inventory_screen():
 
         scrollbar = ttk.Scrollbar(list_frame, orient="vertical")
         listbox = tk.Listbox(list_frame, yscrollcommand=scrollbar.set,
-                             selectmode="single", height=12, width=30)
+                            selectmode="single", height=12, width=30)
         scrollbar.config(command=listbox.yview)
         scrollbar.pack(side="right", fill="y")
         listbox.pack(side="left", fill="both", expand=True)
@@ -614,7 +614,7 @@ def show_inventory_screen():
         tk.Button(btn_row, text="Add",    command=do_add,    width=9, bg="#5cb85c", fg="white").pack(side="left", padx=5)
         tk.Button(btn_row, text="Edit",   command=do_edit,   width=9, bg="#337ab7", fg="white").pack(side="left", padx=5)
         tk.Button(btn_row, text="Delete", command=do_delete, width=9,
-                  bg="#d9534f", fg="white").pack(side="left", padx=5)
+                bg="#d9534f", fg="white").pack(side="left", padx=5)
         tk.Button(btn_row, text="Close",  command=dialog.destroy, width=9).pack(side="left", padx=5)
 
     def _delete_with_reset(del_fn, col, fallback):
@@ -798,7 +798,7 @@ def show_inventory_screen():
 
         tk.Button(btn_row, text="Edit", command=edit_quantity, width=10).pack(side="left", padx=5)
         tk.Button(btn_row, text="Delete", command=remove_item, width=10,
-                  bg="#d9534f", fg="white").pack(side="left", padx=5)
+                bg="#d9534f", fg="white").pack(side="left", padx=5)
         tk.Button(btn_row, text="Export PDF", command=export_pdf, width=10).pack(side="left", padx=5)
         tk.Button(btn_row, text="Close", command=dialog.destroy, width=10).pack(side="left", padx=5)
 
@@ -825,16 +825,6 @@ def show_inventory_screen():
 
     root.mainloop()
 
-
-def show_login_screen():
-    """Displays login interface."""
-    pass
-
-
-def start_gui():
-    """Creates and launches main application window."""
-    show_inventory_screen()
-
-
+# Run the application
 if __name__ == "__main__":
-    start_gui()
+    show_inventory_screen()

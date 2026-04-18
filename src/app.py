@@ -6,18 +6,18 @@ from gui import show_inventory_screen
 app.py purpose:
 The engine that manages the transition between UI states (Login -> Main GUI).
 """
-
+# Runs the application by first showing the login screen, then transitioning to the main inventory screen upon successful login
 def run_app() -> None:
-    # 1. Create the main TK instance for the Login phase
+    
     root = tk.Tk()
     login_app = LoginApp(root)
     root.mainloop()
 
-    # 2. Check the success flag from the login window
-    # If the user logged in successfully, login_app.login_successful will be True
+    # If Login was sucessful, show the inventory screen
     if getattr(login_app, 'login_successful', False):
-        # This function is in your gui.py and starts the main dashboard
+        # Start the main inventory screen
         show_inventory_screen()
 
+# Run Main
 if __name__ == "__main__":
     run_app()
